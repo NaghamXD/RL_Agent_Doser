@@ -1,0 +1,16 @@
+# Physics and medical imaging stack
+# Versions confirmed working by proof-of-concept on OpenKBP pt_1
+
+# Core radiotherapy planning
+pyRadPlan==0.4.0
+
+# Medical imaging
+SimpleITK==2.5.5
+
+# Scientific computing
+numpy==2.3.0
+scipy==1.17.1
+pandas==3.0.3
+
+# Visualization (server-safe — use Agg backend, not TkAgg)
+matplotlib==3.10.9

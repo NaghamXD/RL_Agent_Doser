@@ -1,0 +1,17 @@
+# RL training stack
+# Install after requirements-physics.txt
+
+# Deep learning
+torch==2.3.0
+torchvision==0.18.0
+
+# RL framework — primary (PPO) and baseline (SAC)
+stable-baselines3[extra]==2.3.2
+gymnasium==0.29.1
+
+# Experiment tracking
+tensorboard==2.17.0
+
+# Utilities
+pyyaml==6.0.1
+pytest==8.2.2
