@@ -1,16 +1,50 @@
 # Physics and medical imaging stack
-# Versions confirmed working by proof-of-concept on OpenKBP pt_1
-
-# Core radiotherapy planning
-pyRadPlan==0.4.0
+# Confirmed working on macOS Apple Silicon (M-series), Python 3.11
+#
+# INSTALL IN THIS EXACT ORDER:
+#
+# Step 1 — create and activate conda environment:
+#   conda create -n adaptive-rt python=3.11 -c conda-forge
+#   conda activate adaptive-rt
+#
+# Step 2 — install scientific stack via conda (handles binaries cleanly):
+#   conda install -c conda-forge "numpy>=2.0,<2.3" scipy=1.13.1 pandas=2.2.3 matplotlib=3.9.4 -y
+#
+# Step 3 — install pyRadPlan without its AI dependency chain:
+#   pip install pyRadPlan==0.4.0 --no-deps
+#
+# Step 4 — install pyRadPlan's actual runtime dependencies:
+#   pip install -r requirements-physics.txt
+#
+# Step 5 — install pydantic-ai (satisfies pyRadPlan import check, no deps):
+#   pip install "pydantic-ai>=1.60,<2.0" --no-deps
+#
+# WHY --no-deps FOR pyRadPlan AND pydantic-ai:
+#   pyRadPlan depends on pydantic-ai which pulls in Anthropic, Cohere,
+#   MistralAI, HuggingFace SDKs that conflict with each other.
+#   We only need pyRadPlan's physics engine (calc_dose_influence,
+#   generate_stf) — none of those AI SDKs are used in this project.
 
 # Medical imaging
 SimpleITK==2.5.5
 
-# Scientific computing
-numpy==2.3.0
-scipy==1.17.1
-pandas==3.0.3
+# pydantic stack — required by pyRadPlan's data models
+pydantic>=2.10,<2.20
+pydantic-settings>=2.0
 
-# Visualization (server-safe — use Agg backend, not TkAgg)
-matplotlib==3.10.9
+# pyRadPlan runtime dependencies (installed separately due to --no-deps above)
+array_api_compat
+array_api_extra
+array_api_strict
+h5py>=3.11.0
+jinja2
+numpydantic>=1.6.9
+pint>=0.24.0
+pydicom>=2.4.4
+pymatreader>=1.0.0
+regex>=2024.5.15
+tqdm>=4.0.0
+types-array-api
+
+# Testing
+pytest>=8.0
