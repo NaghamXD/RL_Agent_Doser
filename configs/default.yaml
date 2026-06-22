@@ -1,0 +1,148 @@
+# --- data ---
+raw_dir:        data/original
+processed_dir:  data/processed
+train_split:    train         # subfolder used by train.py
+eval_split:     validation    # subfolder used by evaluate.py
+grid:           64           # resampled cube side
+n_fractions:    35
+
+# --- beams ---
+n_beams:        9
+beamlet_h:      16
+beamlet_w:      16
+
+# --- prescriptions (Gy, full course) ---
+prescription:
+  PTV70: 70.0
+  PTV63: 63.0
+  PTV56: 56.0
+
+# --- OAR tolerances (Gy, mean dose unless stated) ---
+oar_tolerance:
+  Brainstem:    54.0
+  SpinalCord:   45.0
+  Mandible:     70.0
+  LeftParotid:  26.0
+  RightParotid: 26.0
+
+# Per-OAR multiplier inside the OAR penalty (1.0 = neutral).
+# Iteration-2 (2026-06-20): after Tier-1/2 the parotids were still ~90-110%
+# over their 26 Gy mean tol while serial OARs had large slack. Push parotid
+# weights further; serials stay down-weighted (the dose budget moves to them).
+oar_weights:
+  Brainstem:    0.5
+  SpinalCord:   0.6
+  Mandible:     0.5
+  LeftParotid:  1.6
+  RightParotid: 1.6
+
+# Serial OARs (single hot voxel is catastrophic) get an extra Dmax term.
+oar_serial:
+  Brainstem:    true
+  SpinalCord:   true
+  Mandible:     false
+  LeftParotid:  false
+  RightParotid: false
+
+# --- reward weights ---
+# Iteration-2 (2026-06-20): after Tier-1 D95 went from ~37 Gy -> ~52 Gy but
+# is still ~25% short of Rx. Small extra PTV push; OAR-side rebalancing
+# now happens via per-OAR weights (parotids 1.6) rather than global lambda.
+lambda_oar:           0.6
+# Sub-mix inside the OAR penalty: voxel is the main term, mean is a small
+# stabiliser, dmax fires only for serial OARs above. mean_subweight was
+# already raised in Tier-2 to handle parallel-OAR (parotid) mean dose.
+oar_voxel_subweight:  1.0
+oar_mean_subweight:   0.35
+oar_dmax_subweight:   1.0
+# Per-fraction PTV reward weight.  Each fraction is its own PPO episode;
+# the agent is rewarded for delivering its fair share of the remaining PTV
+# gap (target_voxel = max(prescription - cumulative_dose_before, 0)
+#                       / fractions_remaining).
+lambda_ptv:           3.5
+
+# --- sequential (multi-step MDP) mode ---
+# True  -> one episode == one 35-fraction patient course; done only on the
+#          last fraction; dense potential-based shaping + terminal objective;
+#          PPO runs real GAE and gamma/gae_lambda are LIVE.
+# False -> legacy contextual-bandit (each fraction a 1-step episode).
+sequential:           true
+# Physical per-fraction dose cap (Gy/voxel): forces the agent to spread dose
+# across fractions instead of dumping it all at once. 0 disables the cap.
+max_fraction_dose:    3.0
+# Dense PTV-progress potential scale (shaping = gamma*phi(s') - phi(s)).
+lambda_phi:           1.0
+# Weight on -dvh_score in the terminal reward (lambda_ptv*coverage - this*dvh).
+terminal_dvh_weight:  0.1
+# Patient trajectories collected per PPO update (advantages normalised across).
+batch_n_patients:     8
+
+# --- actor exploration (log-std) ---
+# The actor mu is warm-started onto the static FISTA-NNLS plan. Start the
+# global, state-independent log-std HIGH so PPO actively deviates from that
+# one-shot baseline and discovers multi-step strategy. sigma = exp(init);
+# 0.0 -> sigma 1.0. actor_log_std_max is the per-forward clamp ceiling.
+actor_log_std_init:   0.0
+actor_log_std_max:    2.0
+
+# --- PPO ---
+# NOTE ON EPISODE HORIZON: with sequential=true each episode is the whole
+# 35-fraction patient course (done only on the last fraction), so this is a
+# genuine finite-horizon MDP and gamma / gae_lambda are LIVE -- they drive
+# real temporal credit assignment via GAE (see src/agents/ppo.py _compute_gae).
+# With sequential=false the legacy 1-step bandit path applies and the GAE
+# recursion collapses to advantage = reward - value (gamma inert).
+gamma:           0.99         # LIVE in sequential mode (35-step horizon)
+gae_lambda:      0.95         # LIVE in sequential mode
+clip_eps:        0.2
+ent_coef:        0.005
+vf_coef:         0.5
+lr:              1.5e-4
+ppo_epochs:      6
+minibatch:       64
+
+# --- training ---
+# Tier-3: 3500 episodes (with 200 train patients each visited ~17 times via
+# random sampling) so the 600-episode OAR curriculum completes and PPO has
+# ample episodes at full lambda_oar to refine the warm-start plan.
+total_episodes:  3500
+eval_every:      50
+seed:            42
+device:          cuda           # falls back to cpu automatically
+ckpt_dir:        runs
+
+# --- warm-start (supervised actor pretraining) ---
+# Pretrain the actor head to predict the cached per-patient NNLS
+# beamlet plan (a* = argmin_{a>=0} ||DIM @ a - dose_gt/n_fractions||^2)
+# before PPO begins. Run scripts/compute_warmstart_actions.py first.
+# Tier-1: triple SL epochs so PPO starts near a feasible plan rather than
+# near zero -- this is the main lever for fixing PTV underdose at start.
+warmstart_enabled:   true
+warmstart_epochs:    30
+warmstart_minibatch: 4
+warmstart_lr:        3.0e-4
+
+# --- OAR-weight curriculum ---
+# During the first lambda_oar_ramp_episodes patients of PPO training the
+# effective lambda_oar ramps linearly from
+#     lambda_oar * lambda_oar_ramp_start_factor
+# up to the full lambda_oar. This lets the agent learn to deliver dose
+# first (PTV reward dominates) before being heavily penalised for
+# incidental OAR irradiation. Set lambda_oar_ramp_episodes: 0 to disable.
+# Tier-1: stretch ramp to ~30% of training and start almost OAR-free so the
+# policy commits to PTV coverage before OAR pressure ramps up.
+lambda_oar_ramp_episodes:     600
+lambda_oar_ramp_start_factor: 0.10
+
+# --- best.pt selection ---
+# Save best.pt by *validation DVH score* (lower is better) on the first
+# best_n_val_patients of cfg.eval_split, evaluated deterministically
+# every best_eval_every patients during PPO training. The legacy
+# training-reward rolling mean is kept as a diagnostic only.
+# Iteration-2: bump n_val_patients 3 -> 6. With only 3 patients the
+# previous best.pt scored 25.1 but the true 40-patient mean was 27.95,
+# i.e. the selection criterion was noisy enough to lock in an early
+# post-warm-start checkpoint before PPO had time to refine.
+best_n_val_patients: 6
+best_eval_every:     25
+best_rolling_window: 10
