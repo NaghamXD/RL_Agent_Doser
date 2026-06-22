@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RL OpenKBP Pipeline · V5 (sequential 35-step MDP)</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;
+  --border:#2a3248;--border2:#3a4560;
+  --text:#c8d0e8;--text2:#7a8aaa;--text3:#4a5570;
+  --purple:#a78bfa;--purple-bg:#1e1a2e;--purple-border:#3d3060;
+  --teal:#34d399;--teal-bg:#0d2420;--teal-border:#1a4a3a;
+  --amber:#fbbf24;--amber-bg:#221a0a;--amber-border:#4a3a10;
+  --coral:#f87171;--coral-bg:#220f0f;--coral-border:#4a1a1a;
+  --blue:#60a5fa;--blue-bg:#0d1a2e;--blue-border:#1a3a5a;
+  --green:#4ade80;--green-bg:#0a2010;--green-border:#1a4a20;
+  --gray-bg:#161b27;--gray-border:#2a3248;
+}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.65;padding:32px 24px;min-height:100vh;max-width:1100px;margin:0 auto}
+h1{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:500;color:var(--text2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+h1 small{display:block;font-size:11px;color:var(--text3);letter-spacing:.08em;margin-top:6px;text-transform:none}
+h2{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;margin-top:18px}
+
+.lead{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:24px;color:var(--text2);font-size:13px;line-height:1.7}
+.lead b{color:var(--text)}
+
+.glossary{display:flex;flex-direction:column;gap:0;margin-bottom:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.pill{display:grid;grid-template-columns:160px 1fr;gap:12px;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--bg2);align-items:start}
+.pill:last-child{border-bottom:none}
+.pill-term{display:flex;flex-direction:column;gap:1px}
+.pill-term b{color:var(--purple);font-weight:500;font-family:'IBM Plex Mono',monospace;font-size:12px}
+.pill-term small{color:var(--text3);font-size:10px;font-family:'IBM Plex Mono',monospace}
+.pill-desc{color:var(--text2);font-size:12px;line-height:1.5;padding-top:1px}
+
+.phase{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);text-align:center;margin:28px 0 16px;display:flex;align-items:center;gap:10px}
+.phase::before,.phase::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.step{border-radius:10px;padding:14px 18px;margin-bottom:6px;border:1px solid;position:relative}
+.step-title{font-weight:500;font-size:14px;margin-bottom:4px}
+.step-sub{font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;margin-bottom:6px}
+.step-note{font-size:13px;color:var(--text2);line-height:1.7;border-left:2px solid;padding-left:10px;margin-top:8px}
+.step-note p{margin-bottom:8px}
+.step-note p:last-child{margin-bottom:0}
+.step-note b{color:var(--text);font-weight:500}
+.step-code{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);background:var(--bg3);border-radius:5px;padding:6px 10px;margin-top:8px;display:inline-block;border:1px solid var(--border)}
+.step-code a{color:var(--blue);text-decoration:none}
+.step-code a:hover{text-decoration:underline}
+
+.c-gray{background:var(--gray-bg);border-color:var(--gray-border)}.c-gray .step-note{border-color:var(--border2)}
+.c-teal{background:var(--teal-bg);border-color:var(--teal-border)}.c-teal .step-title{color:var(--teal)}.c-teal .step-note{border-color:var(--teal-border)}
+.c-purple{background:var(--purple-bg);border-color:var(--purple-border)}.c-purple .step-title{color:var(--purple)}.c-purple .step-note{border-color:var(--purple-border)}
+.c-amber{background:var(--amber-bg);border-color:var(--amber-border)}.c-amber .step-title{color:var(--amber)}.c-amber .step-note{border-color:var(--amber-border)}
+.c-coral{background:var(--coral-bg);border-color:var(--coral-border)}.c-coral .step-title{color:var(--coral)}.c-coral .step-note{border-color:var(--coral-border)}
+.c-blue{background:var(--blue-bg);border-color:var(--blue-border)}.c-blue .step-title{color:var(--blue)}.c-blue .step-note{border-color:var(--blue-border)}
+.c-green{background:var(--green-bg);border-color:var(--green-border)}.c-green .step-title{color:var(--green)}.c-green .step-note{border-color:var(--green-border)}
+
+.arrow{text-align:center;color:var(--text3);font-size:16px;margin:4px 0;line-height:1}
+.loop-box{border:1px dashed var(--border2);border-radius:12px;padding:16px 14px;margin:8px 0;position:relative}
+.loop-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em;margin-bottom:12px}
+.loop-note{font-size:11px;color:var(--text3);font-style:italic;text-align:right;margin-top:10px}
+.rwd{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:14px}
+.rwd li{border-left:2px solid var(--amber-border);padding-left:12px}
+.rwd-head{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.rwd-head .when{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);font-weight:400;margin-left:6px}
+.rwd-eq{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--amber);background:rgba(251,191,36,.07);border:1px solid var(--amber-border);border-radius:5px;padding:4px 8px;margin:4px 4px 4px 0;display:inline-block}
+.rwd-eqlist{display:flex;flex-direction:column;gap:8px;margin:6px 0 4px}
+.rwd-eqrow{display:flex;flex-direction:column;gap:3px}
+.rwd-eqrow .rwd-eq{display:block;width:fit-content;max-width:100%;margin:0;white-space:pre}
+.rwd-eqrow .rwd-eqnote{font-size:12px;color:var(--text2);line-height:1.5;padding-left:4px}
+.rwd-eqrow .rwd-eqnote b{color:var(--text);font-weight:500}
+.rwd-desc{font-size:13px;color:var(--text2);line-height:1.65;margin-top:4px}
+.rwd-total{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);background:var(--bg3);border-radius:5px;padding:8px 10px;margin-top:10px;line-height:1.7}
+.rwd-intro{font-size:13px;color:var(--text2);line-height:1.7;margin:8px 0 14px}
+.rwd-intro b{color:var(--amber);font-weight:500}
+.rwd-eg{font-size:12px;color:var(--text2);line-height:1.6;margin-top:6px;background:rgba(96,165,250,.06);border-radius:5px;padding:8px 10px;border:1px solid var(--blue-border)}
+.rwd-eg b{color:var(--blue);font-weight:500}
+.rwd-term{font-family:'IBM Plex Mono',monospace;color:var(--amber);font-size:11px}
+.rwd-why{font-size:12px;color:var(--text3);line-height:1.6;margin-top:6px}
+.rwd-why b{color:var(--text2);font-weight:500}
+.tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(167,139,250,.12);color:var(--purple);border:1px solid var(--purple-border);margin-left:8px;vertical-align:middle}
+.tag-new{background:rgba(52,211,153,.12);color:var(--teal);border-color:var(--teal-border)}
+.kv{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:10px 12px;margin-top:6px;line-height:1.9}
+.kv b{color:var(--text);font-weight:500}
+
+.channels{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.ch{font-family:'IBM Plex Sans',sans-serif;font-size:12px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:7px 10px;color:var(--text2);line-height:1.55}
+.ch b{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--purple);font-weight:500;margin-right:8px}
+.ch .ch-label{color:var(--text);font-weight:500}
+.ch .ch-desc{display:block;color:var(--text2);font-size:12px;margin-top:2px}
+.ftbl{width:100%;border-collapse:collapse;margin:10px 0 4px;font-size:12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.ftbl th,.ftbl td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+.ftbl tr:last-child td{border-bottom:none}
+.ftbl th{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;background:var(--bg2)}
+.ftbl td:first-child{font-family:'IBM Plex Mono',monospace;white-space:nowrap;width:1%}
+.ftbl td{color:var(--text2)}
+.ftbl tr.g-base{background:rgba(96,165,250,.06)}.ftbl tr.g-base td:first-child{color:var(--blue)}
+.ftbl tr.g-ptv{background:rgba(167,139,250,.07)}.ftbl tr.g-ptv td:first-child{color:var(--purple)}
+.ftbl tr.g-oar{background:rgba(248,113,113,.06)}.ftbl tr.g-oar td:first-child{color:var(--coral)}
+</style>
+<!-- MathJax for inline $...$ formulas used by the V5 RL framing -->
+<script>
+window.MathJax = {
+  tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
+  options: {skipHtmlTags: ['script','noscript','style','textarea','pre','code']}
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+</head>
+<body>
+
+<h1>
+  RL OpenKBP — Full Pipeline · V5
+  <small>sequential multi-step MDP (one episode = one 35-fraction course) · live GAE · potential-based shaping + terminal objective · per-fraction dose cap · NNLS warm-start before PPO · OAR curriculum · Flask web UI · plain-english walkthrough using the same vocabulary as the lectures</small>
+</h1>
+
+<div class="lead">
+<b>What this project does.</b> It trains a reinforcement-learning (RL) agent to plan a radiotherapy treatment for head &amp; neck cancer patients. Treatment is split into 35 daily sessions (&quot;fractions&quot;). For each session the agent decides how strongly to fire 9 radiation beams from different angles around the patient. The goal is the classic clinical trade-off: <b>deliver enough dose to kill the tumour</b> while <b>sparing the healthy organs</b> next to it.
+<br><br>
+<b>How it is framed as an RL problem (course vocabulary).</b> We model the problem as a <b>finite-horizon Markov Decision Process</b> $(S, A, p, r, \gamma)$. In V5 each <b>episode is the whole 35-fraction patient course</b>: <code>DoseEnv.step</code> returns <code>done = True</code> only on the final fraction. The <b>agent state</b> $S_t$ is the Markovian summary the network sees (CT + structure masks + <i>cumulative</i> dose so far + remaining gap + $t/35$), the <b>action</b> $A_t$ is the 2,304 beamlet intensities for this fraction, and $p$ is deterministic (the DIM multiplies the action to get dose). Because the horizon is real, <b>$\gamma = 0.99$ and $\lambda_{\text{GAE}} = 0.95$ are LIVE</b> — PPO runs genuine Generalised Advantage Estimation and the critic bootstraps return-to-go across the remaining fractions, doing real temporal credit assignment.
+<br><br>
+<b>How the reward works.</b> The dense per-fraction signal is <b>potential-based shaping</b> (Ng et&nbsp;al. 1999): $r_t = \gamma\,\Phi(S_{t+1}) - \Phi(S_t)$, where the potential $\Phi$ rewards a small remaining PTV gap and an under-budget OAR dose. Shaping is <b>policy-invariant</b> — it accelerates learning without changing the optimal policy. The real objective is a <b>terminal reward</b> paid out only on the last fraction: $\lambda_{\text{ptv}}\cdot\text{coverage} - \text{terminal\_dvh\_weight}\cdot\text{dvh\_score}$. A physical <b>per-fraction dose cap</b> ($\text{max\_fraction\_dose} = 3$ Gy/voxel) forces the agent to <i>spread</i> dose over the course instead of dumping it in one shot.
+<br><br>
+<b>Two-stage learning.</b> Before any PPO begins we solve a per-patient <b>non-negative least-squares (NNLS) oracle</b> $a^\ast = \arg\min_{a \geq 0} \lVert \sqrt{W}\,(\text{DIM}\,a - d_\text{gt}/n)\rVert_2^2$ and supervised-pretrain the actor head against $\operatorname{inv\_softplus}(a^\ast)$. This <b>breaks the symmetry</b> of the uniform-init policy. PPO then takes the warm-started policy, starts it with a <b>wide exploration band</b> (log-std init 0.0 ⇒ $\sigma = 1$) so it can break away from that one-shot baseline, and adapts it to maximise the whole-course objective. An <b>OAR-penalty curriculum</b> ramps $\lambda_{\text{oar}}$ from 10&nbsp;% to full over the first 600 patients so the agent commits to coverage before it is heavily penalised for incidental OAR dose.
+<br><br>
+<b>A Flask web UI.</b> <code>app.py</code> serves a JSON API (health, config, patient list, per-patient deterministic simulation, end-of-treatment summary) that a browser front-end consumes to visualise beam heatmaps, cumulative organ doses and PTV/OAR outcomes per fraction — see Phase 4.
+<br><br>
+<b>Coverage status.</b> An earlier release had a bug in the DIM voxel downsampler that left ~25&nbsp;% of PTV voxels unreachable, capping full-mask <code>D95_PTV*</code> at 0&nbsp;Gy. The fixed downsampler (Step 3) does source-side aggregation with a target-side nearest-source fallback, so every target voxel now has at least one DIM contributor; PTV reachability is 99.7&ndash;100&nbsp;% across all 206 patients and full-mask <code>D95</code> matches <code>D95r</code> within rounding.
+</div>
+
+<h2>Glossary — the words you'll keep seeing</h2>
+<div class="glossary">
+  <div class="pill">
+    <div class="pill-term"><b>MDP</b><small>markov decision process</small></div>
+    <div class="pill-desc">The mathematical framing for the whole project (Lecture 3). An MDP is the tuple $(S, A, p, r, \gamma)$: a set of <b>states</b>, a set of <b>actions</b>, a transition / reward model $p(r, s' \mid s, a)$, and a <b>discount factor</b> $\gamma \in [0,1]$. Here $S$ is &quot;the patient and what we've already done&quot;, $A$ is &quot;the 2,304 beamlet intensities to fire this fraction&quot;, and $p$ is fully deterministic (the DIM multiplies the action to get the dose). In V5 the horizon is the real 35-fraction course, so $\gamma$ genuinely discounts future fractions. We assume the <b>Markov property</b>: once the state is known, the history can be thrown away — which is why we explicitly stuff cumulative dose and the remaining gap into the state.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>agent / environment state</b><small>$S_t$ vs the world</small></div>
+    <div class="pill-desc">Lecture 1's distinction. The <b>environment state</b> is the patient's true biology — hidden and huge. The <b>agent state</b> $S_t$ is the compact, Markovian summary the network actually sees. In our project that's 12 channels of $64^3$ (CT + 8 masks + cum dose + remaining gap + beam paths) plus the scalar $t/35$. Everything the policy/critic decides flows from this $S_t$. Because it carries the whole history (cumulative dose), a plain feed-forward policy is sufficient — no recurrence needed.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>reward $R_{t+1}$ &amp; return $G_t$</b><small>scalar feedback + cumulative</small></div>
+    <div class="pill-desc">The <b>reward hypothesis</b> (Lecture 1): any goal can be expressed as maximisation of a scalar reward. After every fraction the environment emits one number $R_{t+1}$ — the potential-based shaping increment, plus a terminal grade on the last fraction. The <b>return</b> is the discounted cumulative reward $G_t = R_{t+1} + \gamma R_{t+2} + \ldots$ that the value function tries to estimate. <b>The return is real</b> here ($\gamma = 0.99$ over the 35-step horizon), so the value function genuinely estimates return-to-go.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>policy $\pi$ &amp; value $v_\pi$</b><small>actor &amp; critic</small></div>
+    <div class="pill-desc">A <b>policy</b> $\pi(a \mid s)$ maps state to a distribution over actions — in our code, the <b>actor</b> head that outputs a Gaussian over 2,304 raw beamlet weights (then softplus). The <b>value function</b> $v_\pi(s) = \mathbb{E}[G_t \mid S_t = s, \pi]$ is the expected return from $s$ under $\pi$ — in our code, the <b>critic</b> head (its own 3-layer MLP). The <b>advantage</b> $A_\pi(s, a) = q_\pi(s, a) - v_\pi(s)$ is what PPO's gradient is weighted by; we estimate it with GAE.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>episode</b><small>finite-horizon trajectory</small></div>
+    <div class="pill-desc">A sequence of $(S, A, R)$ tuples that ends when <code>done = True</code>. <b>An episode is the full 35-fraction patient course</b> — <code>done</code> flips True only on fraction 35, so the trajectory is a genuine 35-step horizon and the value function must propagate the terminal grade backward.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>potential-based shaping</b><small>$\gamma\Phi(s')-\Phi(s)$</small></div>
+    <div class="pill-desc">The dense per-fraction reward in V5 (Ng, Harada &amp; Russell 1999). We define a <b>potential</b> $\Phi(\text{state})$ that is higher for &quot;better&quot; cumulative-dose states, then reward the agent the <i>change</i> in discounted potential each step: $r_t = \gamma\,\Phi(S_{t+1}) - \Phi(S_t)$. The key theorem: adding such a term <b>does not change the optimal policy</b> of the underlying objective — it only reshapes <i>where</i> the reward arrives in time, giving PPO a gradient on every fraction instead of a single sparse terminal grade. Here $\Phi = -\lambda_\phi\cdot\text{ptv\_gap\_fraction} - \lambda_{\text{oar}}\cdot\text{oar\_overshoot\_fraction}$, both computed on the <i>cumulative</i> dose.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>terminal objective</b><small>the real grade</small></div>
+    <div class="pill-desc">The whole-course reward emitted only on fraction 35: $\lambda_{\text{ptv}}\cdot\overline{\text{coverage}} - \text{terminal\_dvh\_weight}\cdot\text{dvh\_score}$, where $\overline{\text{coverage}}$ is the mean over PTVs of the fraction of voxels at or above prescription, and <code>dvh_score</code> (lower = better) measures how close the plan's DVH is to the clinical one. This is what $\gamma$ propagates backward through GAE — the shaping just speeds the journey there.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>OAR</b><small>organs at risk</small></div>
+    <div class="pill-desc">Healthy organs near the tumour that we want to protect. In this project there are exactly five: brainstem, spinal cord, mandible (jaw bone), left parotid (saliva gland) and right parotid. Each has a "safe limit" in Gy that we don't want the dose to cross.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>PTV</b><small>planning target volume</small></div>
+    <div class="pill-desc">The tumour region the plan must "cover" with a prescribed dose. There are three classes — PTV70 needs 70 Gy, PTV63 needs 63 Gy, PTV56 needs 56 Gy — spread across the 35 sessions. Most head &amp; neck patients have all three nested volumes (PTV70 is the gross tumour, PTV63 is high-risk margin, PTV56 is elective nodes).</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>Gy</b><small>gray (the unit of dose)</small></div>
+    <div class="pill-desc">1 gray = 1 joule of radiation absorbed per kilogram of tissue. Tumours need 56–70 Gy total; spinal cord must stay under 45 Gy. That's why every number in this project is in Gy.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>fraction</b><small>one treatment session</small></div>
+    <div class="pill-desc">One day's session. There are 35 of them in a full course. Each session adds a small amount of dose (~2 Gy/session for PTV70) so the body has time to recover between sessions. The <b>per-fraction dose cap</b> (3 Gy/voxel) makes spreading dose across these 35 sessions mandatory.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>beam &amp; beamlet</b><small>radiation pencils</small></div>
+    <div class="pill-desc">A "beam" comes from one angle around the patient (we use 9 angles spaced 40° apart). Each beam is split into a grid of tiny pencil beams called "beamlets" (16 × 16 = 256 per beam). The agent controls each beamlet's intensity independently — that's how you sculpt the dose around an organ.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>DIM</b><small>dose-influence matrix</small></div>
+    <div class="pill-desc">A pre-computed table that says: "if I fire beamlet <i>j</i> at intensity 1, voxel <i>i</i> receives X Gy." It has 262,144 rows (one per voxel) and 2,304 columns (one per beamlet). Once it's built, computing a dose plan is just one (sparse) matrix multiplication — milliseconds instead of minutes.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>CT &amp; HU</b><small>the anatomy image</small></div>
+    <div class="pill-desc">CT is a 3D X-ray scan of the patient. Brightness in standard radiology is measured in Hounsfield Units (HU): air = −1000, water = 0, bone ≈ +1000. <b>OpenKBP stores CT as HU + 1000</b> (a non-negative integer), so the CSVs you'll see contain values from ~0 (air) up to ~4000 (dense bone / metal). Before feeding it to the network we subtract 1000, clip to a fixed window and rescale into <code>[−1, 1]</code> so it sits on the same scale as the binary masks.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>voxel</b><small>3D pixel</small></div>
+    <div class="pill-desc">A 3D pixel. Each voxel has a position in the patient's body and one number per layer (CT brightness, dose, mask value, …). The grid in this project is 64 × 64 × 64 = 262,144 voxels.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>D95</b><small>tumour coverage</small></div>
+    <div class="pill-desc">The dose received by at least 95 % of the tumour. The clinical gold standard: if D95 ≥ prescription, the tumour is well covered. If D95 falls below, the coldest 5 % of the tumour may not get enough dose.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>DVH &amp; DVH score</b><small>dose-volume histogram</small></div>
+    <div class="pill-desc">A DVH is a curve summarising the whole dose distribution in one shape. Our <b>DVH score</b> (used to pick <code>best.pt</code> and to report quality) is a proxy: the mean over present structures of $|\Delta D95| + |\Delta D_\text{mean}|$ versus the clinical ground-truth dose. <b>Lower is better.</b></div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>MAE</b><small>mean absolute error</small></div>
+    <div class="pill-desc">Average of |predicted dose − clinical dose|, computed only over voxels inside the body. Tells you how close the agent's plan is to the human dosimetrist's plan on average.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>PPO</b><small>proximal policy optimisation</small></div>
+    <div class="pill-desc">The on-policy <b>policy-gradient</b> algorithm doing the actual learning. It updates a stochastic policy $\pi_\theta(a\mid s)$ to maximise expected return, but each update is <b>clipped</b> to a trust region (probability ratio kept in $[1-\varepsilon, 1+\varepsilon]$ with $\varepsilon = 0.2$) so the new policy never moves too far from the old one in a single step.<br><br>
+    <b>When does it update in V5?</b> We <b>buffer 8 whole-course trajectories</b> (<code>batch_n_patients</code>), i.e. $8 \times 35 = 280$ transitions, then run a single PPO update over that batch with advantages normalised across all of it. So &quot;8 patients = 1 PPO update&quot;.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>GAE</b><small>generalised advantage estimation</small></div>
+    <div class="pill-desc">PPO's estimator of the <b>advantage</b> $A_t = q_\pi(s,a) - v_\pi(s)$. GAE blends every $k$-step TD residual $\delta_t = R_{t+1} + \gamma\,v(S_{t+1}) - v(S_t)$ with an exponentially decaying weight $\lambda$:<br>
+    <code>A_t = δ_t + (γλ)·δ_{t+1} + (γλ)²·δ_{t+2} + …</code><br><br>
+    <b>Here it runs for real.</b> Because only the last fraction has <code>done = True</code>, the bootstrap $\gamma\,v(S_{t+1})$ is live for fractions 1–34, so the critic genuinely carries the terminal grade back across the course. $\gamma = 0.99$ and $\lambda = 0.95$ <i>do</i> drive credit assignment.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>per-fraction dose cap</b><small>$\text{max\_fraction\_dose}$</small></div>
+    <div class="pill-desc">A physical clip applied to each fraction's dose volume: <code>fraction_dose = min(fraction_dose, 3 Gy)</code> per voxel. Without it the agent could dump the entire course in one fraction; the cap forces the allocation to be genuinely sequential, so the 35-step MDP framing is meaningful and the cumulative dose builds up gradually.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>OAR curriculum</b><small>$\lambda_{\text{oar}}$ ramp</small></div>
+    <div class="pill-desc">For the first <code>lambda_oar_ramp_episodes = 600</code> patients, the effective OAR penalty weight ramps linearly from $0.10\times$ the target up to the full $\lambda_{\text{oar}}$. Early on the PTV reward dominates so the agent learns to actually deliver dose; without the ramp PPO tends to collapse to a near-zero-action policy because the marginal OAR penalty exceeds the marginal PTV gain at initialisation.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>softplus</b><small>the "never negative" function</small></div>
+    <div class="pill-desc">softplus(x) = log(1 + eˣ). Always ≥ 0, can get very close to zero. We apply it to the network's raw output because you cannot deliver negative radiation, but we still want the agent to be able to "turn a beamlet almost off".</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>NNLS warm-start</b><small>per-patient oracle plan $a^\ast$</small></div>
+    <div class="pill-desc">Before PPO starts, we solve a <b>weighted non-negative least-squares</b> problem per patient: $a^\ast = \arg\min_{a \geq 0}\,\lVert\sqrt{W}(\text{DIM}\,a - d_\text{gt}/n_\text{fractions})\rVert^2$ via FISTA. $W$ upweights PTV voxels (×50) and OAR voxels (×5) so PTV coverage dominates the fit. Result: a per-beamlet plan that, if repeated identically every fraction, approximates the clinician's full dose. We cache $a^\ast$ as <code>warmstart_action.npy</code> and use it as a supervised target for the actor head (Step 4a).</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>reachability</b><small>DIM coverage check</small></div>
+    <div class="pill-desc">A voxel $v$ is <b>reachable</b> if at least one beamlet has a non-zero DIM entry into it (row-sum &gt; 0). The original downsampler left ~25 % of PTV voxels unreachable whenever pyRadPlan's native dose grid was coarser than 64 in any axis. The fix in <code>_downsample_matrix</code> uses source-side aggregation plus a target-side nearest-source fallback so every target voxel has at least one DIM contributor; current PTV reachability is 99.7&ndash;100 % across all 206 patients. <code>evaluate.py</code> still reports <code>D95r</code> and <code>%reach</code> so any future regression shows up immediately.</div>
+  </div>
+  <div class="pill">
+    <div class="pill-term"><b>split</b><small>train / validation / test</small></div>
+    <div class="pill-desc">Three groups of patients. <b>Train</b> is what the agent learns from. <b>Validation</b> is held out so we can compare runs and pick the best checkpoint (V5 uses its DVH score to save <code>best.pt</code>). <b>Test</b> is touched once at the very end for the final, unbiased number.</div>
+  </div>
+</div>
+
+<div class="phase">Phase 1 — One-time setup (run these once, before training)</div>
+
+<div class="step c-gray">
+  <div class="step-title">Step 0 · The raw OpenKBP data <span class="tag">starting point</span></div>
+  <div class="step-sub">data/original/&lt;split&gt;/pt_*/{ct, dose, possible_dose_mask, voxel_dimensions, PTV*, OAR*}.csv</div>
+  <div class="step-note">
+    <p>Everything starts from the public OpenKBP challenge dataset. Each patient lives in their own folder (<code>pt_1</code>, <code>pt_2</code>, …) and the patients are already split into <b>train</b>, <b>validation</b> and <b>test</b> groups — we keep that same split.</p>
+    <p>Inside a patient folder you'll find a handful of CSV files — the CT scan, the clinical dose plan (used only later for grading the agent), a "possible dose" mask showing where beams can physically reach, the voxel size in millimetres, and one CSV per organ or tumour that actually exists for that patient:</p>
+    <table class="ftbl">
+      <thead><tr><th>File</th><th>Contains</th></tr></thead>
+      <tbody>
+        <tr class="g-base"><td>ct.csv</td><td>HU value (tissue density) for each non-empty voxel in the CT scan</td></tr>
+        <tr class="g-base"><td>dose.csv</td><td>Total radiation dose in Gy received by each voxel after all 35 treatment fractions</td></tr>
+        <tr class="g-base"><td>possible_dose_mask.csv</td><td>List of voxels where beams can physically deposit dose</td></tr>
+        <tr class="g-base"><td>voxel_dimensions.csv</td><td>Physical size of one voxel in mm (3.906 × 3.906 × 2.5)</td></tr>
+        <tr class="g-ptv"><td>PTV70.csv</td><td>Voxels belonging to the primary tumour — must receive 70 Gy</td></tr>
+        <tr class="g-ptv"><td>PTV63.csv</td><td>Voxels in the high-risk margin around the tumour — must receive 63 Gy</td></tr>
+        <tr class="g-ptv"><td>PTV56.csv</td><td>Voxels in the elective margin — must receive 56 Gy</td></tr>
+        <tr class="g-oar"><td>Brainstem.csv</td><td>Voxels belonging to the brainstem — tolerance 54 Gy</td></tr>
+        <tr class="g-oar"><td>SpinalCord.csv</td><td>Voxels belonging to the spinal cord — tolerance 45 Gy</td></tr>
+        <tr class="g-oar"><td>LeftParotid.csv</td><td>Voxels belonging to the left parotid gland — mean-dose tolerance 26 Gy</td></tr>
+        <tr class="g-oar"><td>RightParotid.csv</td><td>Voxels belonging to the right parotid gland — mean-dose tolerance 26 Gy</td></tr>
+        <tr class="g-oar"><td>Mandible.csv</td><td>Voxels belonging to the jaw bone — tolerance 70 Gy</td></tr>
+      </tbody>
+    </table>
+    <p>To save disk space, the CSVs don't list every voxel — they only list the non-zero ones, as pairs of <b>(flat index, value)</b>. A flat index is a single number that tells you where a voxel sits in the 3D grid. Nothing is processed yet; this is the messy starting form.</p>
+  </div>
+  <div class="step-code">read by <a href="src/data/loader.py">src/data/loader.py</a> · download instructions in <a href="README.md">README.md</a></div>
+</div>
+<div class="arrow">↓&nbsp;&nbsp; <code>python scripts/preprocess.py --raw data/original --out data/processed</code></div>
+
+<div class="step c-teal">
+  <div class="step-title">Step 1 · Clean, resample, and stack into 3D arrays</div>
+  <div class="step-sub">load_patient → SimpleITK resample to 64³ → CT → [−1, 1] → ray-cast beam paths</div>
+  <div class="step-note">
+    <p>This step turns the sparse CSVs into clean, ready-to-use 3D arrays.</p>
+    <p>For every patient we (1) rebuild each organ mask and dose volume back into a full 3D grid, (2) <b>resample everything to a fixed 64 × 64 × 64 cube</b> using the real millimetre spacing so patients of different scan depths all end up the same shape, (3) subtract 1000 from the CT (OpenKBP stores it as HU + 1000) to recover true Hounsfield units, then clip to <code>[−1000, +1000]</code> HU and divide by 1000 → <code>[−1, 1]</code>, and (4) pre-draw a simple "beam-path map" — for each of the 9 gantry angles (spaced 40° apart) we cast one ray through the iso-centre and extrude the touched (x, y) voxels along the full z range.</p>
+    <p>If an organ file is missing for a patient (not every patient has every organ), it becomes an all-zero mask channel and the reward and metrics layers know to skip it — nothing crashes.</p>
+  </div>
+  <div class="step-code">see <a href="src/data/preprocess.py">src/data/preprocess.py</a> · functions <code>preprocess_patient</code>, <code>_resample</code>, <code>ray_cast_beam_paths</code></div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="step c-teal">
+  <div class="step-title">Step 2 · Cache to disk as fast .npy arrays</div>
+  <div class="step-sub">data/processed/&lt;split&gt;/&lt;pt&gt;/ → ct.npy · masks.npy · beam_paths.npy · possible_dose_mask.npy · dose_gt.npy · voxel_dims.npy · structure_names.npy</div>
+  <div class="step-note">
+    <p>Parsing CSVs and resampling is slow, and during training each patient is revisited hundreds of times. So we do the work <b>once</b> and save the results as fast-loading NumPy <code>.npy</code> files, organised under the same <code>train/validation/test</code> folder layout as the raw input.</p>
+    <p>From this point on, training and evaluation only touch these <code>.npy</code> caches — the original CSVs are never opened again.</p>
+  </div>
+  <div class="step-code">written by <a href="src/data/preprocess.py">preprocess_patient</a> · loaded by <code>load_processed()</code></div>
+</div>
+<div class="arrow">↓&nbsp;&nbsp; <code>python scripts/compute_dose_influence_matrix.py --processed data/processed</code> &nbsp; (~5–10 min/patient, CPU)</div>
+
+<div class="step c-teal">
+  <div class="step-title">Step 3 · Build the Dose Influence Matrix (DIM) <span class="tag">slow, but only once</span></div>
+  <div class="step-sub">pyRadPlan(SVDPB) · 9 gantry angles 40° apart · 16 × 16 beamlets per beam · → dose_influence_matrix.npz, sparse CSR of shape (262144 × 2304)</div>
+  <div class="step-note">
+    <p>pyRadPlan is an open-source radiotherapy physics library. We hand it the patient's CT, the organ outlines, and our beam setup (9 angles, each split into a 16 × 16 grid of beamlets = 256 beamlets/beam = <b>2,304 beamlets total</b>). It then simulates how X-rays travel through the body — taking into account that bone, muscle and air absorb differently.</p>
+    <p>The result is the <b>Dose Influence Matrix (DIM)</b>: a big table with one row per voxel (262,144 rows) and one column per beamlet (2,304 columns). Each cell answers: <i>"how many Gy does this beamlet deposit in this voxel at intensity 1?"</i> It is stored as a <b>sparse CSR</b> matrix (<code>dose_influence_matrix.npz</code>); legacy <code>dim.npz</code> / <code>dim.npy</code> files still load for back-compat.</p>
+    <p>This simulation is slow (5–10 min per patient), but it only runs once per patient — the body doesn't change between sessions. The huge payoff: during training, computing the dose for any choice of beam intensities becomes one fast matrix multiplication: <code>dose = DIM · intensities</code>.</p>
+    <p><b>Voxel downsampler (now fixed).</b> pyRadPlan returns the DIM on its own dose grid (typical: 47×100×100, often coarser than 64 in z) and we resample it to 64³ with a sparse mean-pool matrix. The original implementation routed every <i>source</i> voxel into <code>floor(s·grid/N)</code>, which for axes with <code>N&lt;grid</code> left whole rows of target voxels unmapped &mdash; leaving ~25 % of PTV voxels with all-zero DIM rows and pinning full-mask <code>D95</code> to 0 Gy. The fix is two-pass: (1) every source voxel aggregates into its target via the nearest-centre rule <code>floor((s+0.5)·grid/N)</code>; (2) any target voxel left unfilled gets a single nearest-source contribution <code>floor((t+0.5)·N/grid)</code>. Row-totals are then normalised. After the fix every target voxel is covered and PTV reachability is 99.7&ndash;100 % on all 206 patients.</p>
+  </div>
+  <div class="step-code">see <a href="scripts/compute_dose_influence_matrix.py">scripts/compute_dose_influence_matrix.py</a> · also writes <code>charts/dose_influence_matrix.log</code> + diagnostic PNGs per patient</div>
+</div>
+<div class="arrow">↓&nbsp;&nbsp; <code>python scripts/compute_warmstart_actions.py --config configs/default.yaml</code> &nbsp; (~10 s/patient, CPU)</div>
+
+<div class="step c-teal">
+  <div class="step-title">Step 3b · Per-patient NNLS warm-start <span class="tag">oracle plan a*</span></div>
+  <div class="step-sub">weighted FISTA-NNLS · target = $d_\text{gt}/n_\text{fractions}$ · weights: PTV ×50, OAR ×5, body ×1 · → warmstart_action.npy of shape (2304,)</div>
+  <div class="step-note">
+    <p>This step pre-computes a high-quality beamlet plan per patient that the actor head will <b>imitate</b> before PPO begins. Without it, the actor head starts from a uniform initialisation and PPO cannot move it in any reasonable number of episodes (the policy stays frozen at <code>softplus(-1) ≈ 0.31</code> per beamlet).</p>
+    <p>We frame it as <b>weighted non-negative least-squares</b>:</p>
+    <p style="text-align:center">$a^\ast \;=\; \arg\min_{a \geq 0}\;\lVert \sqrt{W}\,(\text{DIM}\,a \;-\; d_\text{gt}/n_\text{fractions}) \rVert_2^2$</p>
+    <ul style="margin:6px 0 6px 18px;color:var(--text2);font-size:13px;line-height:1.7">
+      <li><b>Target $d_\text{gt}/n_\text{fractions}$</b> — the per-fraction "fair share" of the clinician's total dose. If the agent could repeat $a^\ast$ every fraction, the cumulative would approximate <code>dose_gt</code>.</li>
+      <li><b>Per-voxel weights $W$</b> — body voxels weight 1, OAR voxels weight 5, PTV voxels weight 50. Without weighting, body voxels (~95 % of the volume) drown the fit and PTVs are under-dosed.</li>
+      <li><b>Solver</b> — FISTA (accelerated projected gradient) with a non-negativity projection each step and Nesterov momentum; ~400 iterations per patient, ~10 s on CPU.</li>
+    </ul>
+    <p>Cache: one <code>warmstart_action.npy</code> per patient. Typical $a^\ast$ is sparse — only a fraction of the 2304 beamlets are meaningfully active — which is exactly the kind of structured plan that beats the uniform-init baseline immediately. (Exact weights and iteration count live in <a href="scripts/compute_warmstart_actions.py">scripts/compute_warmstart_actions.py</a>.)</p>
+  </div>
+  <div class="step-code">see <a href="scripts/compute_warmstart_actions.py">scripts/compute_warmstart_actions.py</a> · solver <code>fista_nnls_weighted</code></div>
+</div>
+
+<div class="phase">Phase 2 — Training loop (one episode = one 35-fraction course · 8 courses per PPO update)</div>
+
+<div class="step c-blue">
+  <div class="step-title">Step 4a · Supervised actor pretraining on $a^\ast$ <span class="tag">runs once, before PPO</span></div>
+  <div class="step-sub">target = $\operatorname{inv\_softplus}(a^\ast / \text{ACTION\_SCALE})$ · loss = MSE on actor_mu output · 30 epochs · minibatch 4 · Adam lr 3e-4 · updates encoder + actor trunk + actor_mu</div>
+  <div class="step-note">
+    <p>Before PPO starts, we load each training patient's $a^\ast$ from Step 3b, build the fraction-0 state, and fit the actor head so that its <i>deterministic</i> output reproduces $a^\ast$. Concretely we regress <code>actor_mu(features(state, t/35=0))</code> against $\operatorname{inv\_softplus}(a^\ast) = \log(\exp(a^\ast) - 1)$, floored at $-8$ so zero-beamlets don't blow up to $-\infty$.</p>
+    <p><b>Why pretrain $\mu$ instead of the full distribution?</b> We want to keep the on-policy exploration noise (<code>log_std</code>) intact for PPO — we only need to <i>break the per-beamlet symmetry</i> of the uniform initialisation. The critic and <code>log_std</code> are deliberately left at their init values; PPO learns them from scratch. The state stack is kept on the host and only minibatches are shipped to the GPU, so the ~200-patient warm-start fits in normal RAM.</p>
+    <p><b>Why 30 epochs?</b> In the sequential setup PPO must start near a <i>feasible</i> plan rather than near zero — more supervised epochs is the main lever for fixing PTV underdose at the start of training, before the OAR curriculum begins to bite.</p>
+    <p>We save the post-pretrain weights to <code>runs/warmstart.pt</code> so you can evaluate the imitation policy alone and compare it to the post-PPO policy.</p>
+  </div>
+  <div class="step-code">see <a href="src/agents/ppo.py">PPO.pretrain_actor</a> and the <code>_warmstart_actor</code> driver in <a href="train.py">train.py</a></div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="step c-gray">
+  <div class="step-title">Step 4 · Start a new patient course <span class="tag">env.reset() = one episode</span></div>
+  <div class="step-sub">pick a train patient → load .npy + dose_influence_matrix.npz → cumulative_dose = zeros(64³) → fraction_index = 0</div>
+  <div class="step-note">
+    <p>A <b>patient course</b> means treating one patient through all 35 fractions — and in V5 that whole course <b>is one episode</b>. <code>env.reset()</code> is called once per patient: we pick a random patient from the train split, load their cached arrays and DIM into memory, zero out the running <b>cumulative dose</b> volume, and reset the session counter <code>t = 0</code>.</p>
+    <p>Each <code>step()</code> inside the course advances one fraction. The environment's internal state — <code>cumulative_dose</code>, <code>fraction_index</code>, <code>self._patient</code> — persists across the 35 steps, and <code>done</code> is returned <b>False until fraction 35</b>, where it equals <code>info["patient_done"]</code>. The training loop watches that flag to know when to reset to the next patient.</p>
+  </div>
+  <div class="step-code">see <a href="src/env/dose_env.py">DoseEnv.reset</a> · patient-done flag in <code>info["patient_done"]</code> (== <code>done</code> in sequential mode)</div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="loop-box">
+  <div class="loop-label">fraction loop · fraction_index = 1 … 35 · done = True only on fraction 35 · cumulative_dose &amp; fraction_index persist across the whole episode</div>
+
+  <div class="step c-purple">
+    <div class="step-title">Step 5 · Build the state — what the agent sees</div>
+    <div class="step-sub">12 channels of 64 × 64 × 64 + a scalar t/35</div>
+    <div class="step-note">
+      <p>Before deciding anything, the agent looks at a stack of <b>12 3D layers</b>, each covering the whole patient:</p>
+      <div class="channels">
+        <div class="ch"><b>ch 0</b><span class="ch-label">CT scan (anatomy)</span><span class="ch-desc">The patient's tissue map in [−1, 1] — lets the agent see where bone, soft tissue and air are so it knows what each beam will be passing through.</span></div>
+        <div class="ch"><b>ch 1–3</b><span class="ch-label">PTV70 · PTV63 · PTV56 masks</span><span class="ch-desc">Three binary 0/1 volumes pinpointing exactly where the three tumour targets sit and what dose level each one is asking for.</span></div>
+        <div class="ch"><b>ch 4–8</b><span class="ch-label">Brainstem · SpinalCord · Mandible · L/R Parotid masks</span><span class="ch-desc">Five binary masks marking the organs the agent must protect, each on its own channel so the network can learn organ-specific avoidance behaviour.</span></div>
+        <div class="ch"><b>ch 9</b><span class="ch-label">cumulative dose so far ÷ 70</span><span class="ch-desc">A running tally of the dose already delivered in earlier sessions — this is the agent's memory of "what have I done up to now". It is what makes the state Markov despite a feed-forward policy.</span></div>
+        <div class="ch"><b>ch 10</b><span class="ch-label">remaining tumour dose ("the gap") ÷ 70</span><span class="ch-desc">Per-voxel difference between each PTV's prescription and the dose accumulated so far, clipped ≥ 0 — a live to-do map showing which tumour regions still need more radiation.</span></div>
+        <div class="ch"><b>ch 11</b><span class="ch-label">beam-path map</span><span class="ch-desc">A pre-drawn sketch of which voxels each of the 9 gantry angles passes through, so the agent understands the geometric reach of every beam direction. All 9 angles are merged into this one volume — it does not distinguish which beam touched which voxel, only "is this voxel inside <i>some</i> beam path."</span></div>
+      </div>
+      <p style="margin-top:10px">Why divide by 70? Networks learn best when all inputs sit in a similar small range. Mixing huge numbers (50 Gy) with small ones (binary masks of 0/1) confuses them.</p>
+      <p>A single extra number — <b>t/35</b>, "what fraction of the course is done" — is <i>not</i> stacked as a channel. It's appended later, after the CNN compresses the 12 layers.</p>
+    </div>
+    <div class="step-code">see <a href="src/env/dose_env.py">DoseEnv._build_state</a></div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="step c-purple">
+    <div class="step-title">Step 6 · 3D-CNN encoder — squeeze the volume into 128 numbers</div>
+    <div class="step-sub">12 × 64³ → Conv3d × 4 (stride 2) → 4³ → AdaptiveAvgPool → 128 → +1 scalar t/35 → 129 features</div>
+    <div class="step-note">
+      <p>The 12 × 64³ state has ~3 million numbers — far too many for the decision-making layer. A 3D Convolutional Neural Network (CNN) slides small 3D filters over the whole volume, looking for meaningful local patterns (e.g. "tumour voxel right next to spinal cord that's already nearly at its limit").</p>
+      <p>Four convolution layers halve the volume each time (64 → 32 → 16 → 8 → 4) while growing the number of "feature channels" (12 → 16 → 32 → 64 → 128). An adaptive average-pool collapses the 4³ × 128 feature volume into 128 numbers, and a small linear layer projects them into the final 128-number summary vector.</p>
+      <p>Finally we tack on the single scalar <b>t/35</b>, giving a 129-number feature vector. Both the actor (which picks an action) and the critic (which scores the state) read from this same vector through their own trunks.</p>
+    </div>
+    <div class="step-code">see <a href="src/models/encoder.py">CNNEncoder3D</a> · <a href="src/models/actor_critic.py">ActorCritic.features</a></div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="step c-amber">
+    <div class="step-title">Step 7 · Actor head — the agent picks its action</div>
+    <div class="step-sub">features (129) → Linear 256 + ReLU → Linear 256 + ReLU → mu (2,304) ; std = clamp(log_std, [−5, +2]).exp(); raw ~ Normal(mu, std); action = softplus(raw) · ACTION_SCALE</div>
+    <div class="step-note">
+      <p>This is the heart of the RL agent. The 129-number feature vector from Step 6 is fed into the <b>actor trunk</b>: two fully-connected layers of width 256, each followed by ReLU. The output goes through one more linear layer — <code>actor_mu</code> — producing a vector of length <b>2,304</b>, one number per beamlet. That vector is <code>mu</code>: the <i>centre of the Gaussian the agent samples from for each beamlet</i>. It lives in raw pre-softplus space and can be negative; only after the sample passes through <code>softplus</code> does it become the non-negative intensity vector multiplied by the DIM in Step 8.</p>
+
+      <p><b>Initialisation.</b> The actor_mu weights use orthogonal init with gain 0.01 and the bias is initialised to <code>ACTOR_MU_BIAS_INIT = -1.0</code>, so a fresh untrained policy outputs $\mu \approx -1$ for every beamlet (deterministic action $\operatorname{softplus}(-1) \approx 0.31$ uniformly). That uniform-init policy is a pathological local minimum, which is why Step 4a's supervised warm-start replaces this uniform $\mu$ with per-beamlet $\operatorname{inv\_softplus}(a^\ast)$ <i>before</i> PPO ever runs.</p>
+
+      <p><b>Exploration band — wide on purpose.</b> The standard deviation is a <i>state-independent</i>, <i>learnable</i> parameter <code>log_std</code>, one value per beamlet. In V5 it is initialised from the config to <code>actor_log_std_init = 0.0</code> (so initial $\sigma = e^0 = 1.0$) and clamped each forward pass to $[-5, +2]$ (so $\sigma \le e^2 \approx 7.4$). Why so wide: because <code>mu</code> is warm-started onto the static one-shot NNLS plan, a <i>narrow</i> $\sigma$ would pin the policy to that baseline and stop it discovering genuinely multi-step strategy. Starting wide lets PPO deviate from the warm-start and explore how to <i>sequence</i> dose across fractions.</p>
+
+      <p><b>Sample vs. mean — train vs. eval.</b> The agent's <code>act()</code> method has a <code>deterministic</code> flag:</p>
+      <ul style="margin:6px 0 8px 22px;color:var(--text2)">
+        <li><b>Training</b> (<code>deterministic=False</code>): <code>raw = dist.sample()</code> — one random draw from <code>Normal(mu, std)</code> per beamlet. This lets the agent <i>explore</i>.</li>
+        <li><b>Evaluation / the web UI</b> (<code>deterministic=True</code>): <code>raw = dist.mean</code> (just <code>mu</code>). No randomness — running the same patient twice produces the exact same plan, mandatory for clinical reproducibility.</li>
+      </ul>
+
+      <p><b>Log-probability for PPO.</b> The actor also returns <code>logp = dist.log_prob(raw).sum(-1)</code> — the total log-probability of that sample under the current policy. PPO stores this <i>old</i> log-prob and later compares it to the <i>new</i> one after an update, forming the clipped probability ratio. PPO computes <code>log_prob</code> on the <i>raw</i> sample (not the softplus output); this works because softplus is monotonic.</p>
+
+      <p><b>From raw sample to physical intensities.</b> A <code>Normal</code> is unbounded, but you can't deliver negative radiation. So we run <code>raw</code> through <b>softplus</b> and scale by <code>ACTION_SCALE = 1.0</code>: a smooth map to a strictly positive value that can still get arbitrarily close to zero. The result is the <b>action</b> — the 2,304-long vector of non-negative intensities shipped to Step 8.</p>
+    </div>
+    <div class="step-code">see <a href="src/models/actor_critic.py">ActorCritic</a> (forward + to_action) and <a href="src/agents/ppo.py">PPO.act</a> · n_beamlets = 9 · 16 · 16 = 2,304 · ACTOR_MU_BIAS_INIT = −1.0 · actor_log_std_init = 0.0 · log_std clamp = [−5, +2] · ACTION_SCALE = 1.0</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="step c-coral">
+    <div class="step-title">Step 8 · Apply the DIM — turn intensities into dose <span class="tag">+ per-fraction cap</span></div>
+    <div class="step-sub">fraction_dose = DIM · intensities ; mask outside body ; clip to max_fraction_dose = 3 Gy ; cumulative_dose += fraction_dose</div>
+    <div class="step-note">
+      <p>Now we cash in the DIM we built earlier. The 2,304-long intensity vector is multiplied by the (sparse) DIM, instantly giving the dose (in Gy) that each of the 262,144 voxels would receive in this single session.</p>
+      <p>We then multiply by the <b>possible-dose mask</b> — OpenKBP's region where dose is allowed to be evaluated — so spillover into empty air is zeroed out.</p>
+      <p><b>Per-fraction dose cap.</b> Each voxel's fraction dose is then clipped to <code>max_fraction_dose = 3 Gy</code>. This is what forces the agent to <i>spread</i> dose across the 35 fractions instead of dumping it all at once — without it, the sequential MDP would degenerate back into a one-shot allocation. Anything the agent tries to push above the cap is wasted, and it learns not to.</p>
+      <p>The capped fraction dose is <b>added</b> to the running cumulative dose volume. That cumulative dose is what the next state shows the agent through channels 9 (delivered) and 10 (still missing) — so the agent always knows where it stands.</p>
+    </div>
+    <div class="step-code">see <a href="src/env/dose_env.py">DoseEnv.step</a> · no live pyRadPlan call here — just one sparse matrix multiply + clip</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="step c-amber">
+    <div class="step-title">Step 9 · Reward signal <span class="tag">potential-based shaping + terminal objective</span></div>
+    <div class="step-sub">$R_{t+1} = \gamma\,\Phi(\text{cum}_{\text{after}}) - \Phi(\text{cum}_{\text{before}})\;\;[+\;\text{terminal grade if fraction 35}]$</div>
+
+    <div class="rwd-intro">
+      The agent is never told &quot;the correct beam intensities&quot; — those don't exist in the data. In V5 the learning signal has <b>two parts</b>: a <b>dense potential-based shaping</b> term on every fraction, plus a <b>terminal whole-course grade</b> on fraction 35. The shaping is policy-invariant (it can't change the optimal plan, only speed learning toward it); the terminal grade is the real objective that $\gamma$ carries backward through GAE.
+      <br><br>
+      <i>Note:</i> a per-fraction PTV reward and OAR penalty are also computed every step and returned in <code>info</code> as <b>diagnostics</b> (so the training log carries <code>ptv</code> / <code>oar</code> columns), but they do not feed the reward — the shaping and terminal terms above are the actual signal.
+    </div>
+
+    <ul class="rwd">
+      <li>
+        <div class="rwd-head">1 · Dense shaping — change in potential each fraction<span class="when">fractions 1–35 · policy-invariant</span></div>
+        <div class="rwd-eqlist">
+          <div class="rwd-eqrow">
+            <span class="rwd-eq">ptv_gap_fraction = mean over PTV voxels of clip(Rx − cumulative_dose, 0) / Rx</span>
+            <div class="rwd-eqnote"><b>Unmet PTV fraction, in [0, 1].</b> 0 means every PTV voxel is already at or above prescription; 1 means nothing delivered. Computed on the <i>cumulative</i> dose so it summarises the whole history (Markov).</div>
+          </div>
+          <div class="rwd-eqrow">
+            <span class="rwd-eq">oar_overshoot_fraction = Σ_organs organ_weight · max(0, mean_dose − tol) / tol</span>
+            <div class="rwd-eqnote"><b>Weighted OAR overshoot vs the FULL-course tolerance.</b> 0 while every organ's cumulative mean dose stays under budget; grows once an organ exceeds its whole-course tolerance. Scaled by the per-organ weights (parotids 1.6, serials 0.5–0.6).</div>
+          </div>
+          <div class="rwd-eqrow">
+            <span class="rwd-eq">Φ(cumulative_dose) = − λ_phi · ptv_gap_fraction − λ_oar · oar_overshoot_fraction</span>
+            <div class="rwd-eqnote"><b>The potential.</b> Higher (closer to 0) is a better state: small PTV gap and under-budget OARs both raise Φ. <code>λ_phi = 1.0</code>; <code>λ_oar</code> is the curriculum-ramped value (see Step 10 / training loop).</div>
+          </div>
+          <div class="rwd-eqrow">
+            <span class="rwd-eq">shaping_reward = γ · Φ(cum_after) − Φ(cum_before)</span>
+            <div class="rwd-eqnote"><b>Potential-based shaping</b> (Ng et al. 1999). Rewarding the discounted <i>increase</i> in potential gives PPO a gradient every fraction while provably leaving the optimal policy of the terminal objective unchanged. <code>γ = 0.99</code>.</div>
+          </div>
+        </div>
+        <div class="rwd-desc">
+          Intuition: each fraction the agent is paid for how much closer it moved the <i>cumulative</i> plan toward "all PTV gap closed, no OAR over budget", discounted by $\gamma$. Because it is a difference of potentials, the contributions telescope over the course — the total shaping reward depends only on the start and end states, so it cannot bias the agent toward a worse final plan.
+        </div>
+        <div class="rwd-why"><b>Why shape at all?</b> The real objective only arrives on fraction 35. Without shaping, fractions 1–34 would carry almost no gradient and PPO would learn glacially. Shaping front-loads a dense, unbiased signal.</div>
+      </li>
+      <li>
+        <div class="rwd-head">2 · Terminal objective — the whole-course grade<span class="when">fraction 35 only</span></div>
+        <div class="rwd-eqlist">
+          <div class="rwd-eqrow">
+            <span class="rwd-eq">coverage_mean = mean over present PTVs of fraction of voxels with cumulative_dose ≥ Rx</span>
+            <div class="rwd-eqnote"><b>PTV coverage.</b> For each tumour class, the share of its voxels that reached prescription; averaged across the PTVs the patient actually has. This is the headline "did we treat the tumour" number.</div>
+          </div>
+          <div class="rwd-eqrow">
+            <span class="rwd-eq">dvh_score = mean over present structures of |ΔD95| + |ΔDmean| vs ground-truth dose</span>
+            <div class="rwd-eqnote"><b>Plan-quality penalty (lower better).</b> How far the finished plan's DVH summary sits from the clinician's. Computed by <code>metrics.dvh_score</code> on the final cumulative dose.</div>
+          </div>
+          <div class="rwd-eqrow">
+            <span class="rwd-eq">terminal_reward = λ_ptv · coverage_mean − terminal_dvh_weight · dvh_score</span>
+            <div class="rwd-eqnote"><b>Added to fraction 35's reward.</b> <code>λ_ptv = 3.5</code>, <code>terminal_dvh_weight = 0.1</code>. This is the only term GAE has to carry backward — every earlier fraction's value estimate exists to predict it.</div>
+          </div>
+        </div>
+        <div class="rwd-desc">
+          The terminal grade is what makes this a real sequential-decision problem: the agent must arrange 35 capped fractions so that the <i>final</i> cumulative dose both covers the tumour and matches a clinically sensible DVH. The critic learns to predict this grade from any mid-course state, and $\gamma$ discounts it back so early fractions are credited for setting up a good ending.
+        </div>
+        <div class="rwd-why"><b>Why grade on coverage + DVH?</b> Because the objective we actually care about is a property of the <i>finished</i> plan, not of any single fraction. The sequential framing lets us optimise that directly, with the dense shaping providing per-fraction guidance toward it.</div>
+      </li>
+    </ul>
+
+    <div class="rwd-total">
+      R_{t+1} = γ · Φ(cumulative_after) − Φ(cumulative_before)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ [ λ_ptv · coverage_mean − terminal_dvh_weight · dvh_score ]&nbsp; if fraction_index == 35<br>
+      <br>
+      Φ = − λ_phi · ptv_gap_fraction − λ_oar · oar_overshoot_fraction<br>
+      λ_phi = <b>1.0</b> · λ_oar = <b>0.6</b> (ramped) · λ_ptv = <b>3.5</b> · terminal_dvh_weight = <b>0.1</b> · γ = <b>0.99</b> &nbsp;(in <code>configs/default.yaml</code>)
+    </div>
+    <div class="rwd-why" style="margin-top:8px">The shaping pulls the cumulative plan toward "tumour covered, organs spared" every fraction; the terminal grade is the actual exam at the end. Because the shaping is a potential difference, the two are consistent — the dense signal never rewards anything that would hurt the final grade.</div>
+  </div>
+
+  <div class="loop-note">↺ DoseEnv.step returns (next_state, t/35, reward, done, info); done is True only at fraction 35, where info also carries terminal_reward &amp; dvh_score</div>
+</div>
+<div class="arrow">↓&nbsp;&nbsp;at the end of all 35 fractions we have one full Rollout (35 transitions of (state, action, reward, value, logp, done)); 8 such rollouts are buffered before a PPO update</div>
+
+<div class="step c-blue">
+  <div class="step-title">Step 10 · PPO update — one update per 8 patients <span class="tag">src/agents/ppo.py</span></div>
+  <div class="step-sub">8 × 35 = 280 transitions · real GAE (γ = 0.99, λ = 0.95, last_value = 0) · advantages normalised across the batch · clip ε = 0.2 · 6 epochs × minibatch 64 · lr 1.5e-4 · grad clip 0.5 · rewards &amp; values clipped to [−50, +50] · NaN-skip</div>
+  <div class="step-note">
+    <p>The training loop buffers <code>batch_n_patients = 8</code> whole-course rollouts, then runs a single PPO update over all 280 transitions.</p>
+
+    <p><b>(0) Defensive clipping.</b> Both <code>rewards</code> and <code>values</code> are clipped to $[-50, +50]$ before any maths. A single very bad fraction during early exploration can otherwise produce a huge reward that destabilises the value target and advantage normalisation. Anything non-finite after clipping causes the whole update to be <b>skipped</b> — better to lose one batch's gradient than to poison Adam's moments with NaNs.</p>
+
+    <p><b>(a) Real GAE.</b> Each trajectory gets its own GAE pass: $\delta_t = R_{t+1} + \gamma\,V(S_{t+1})\,(1-\text{done}_t) - V(S_t)$, accumulated backward with weight $\gamma\lambda$. Because <code>done</code> is True only on fraction 35, the bootstrap $\gamma V(S_{t+1})$ is <b>live for fractions 1–34</b> — the critic genuinely carries the terminal grade back across the course (<code>last_value = 0</code> is the correct terminal bootstrap). Advantages from all 8 trajectories are concatenated and normalised to mean 0 / std 1 <b>across the whole batch</b> (lower variance than per-trajectory normalisation with only 35 steps each).</p>
+
+    <p><b>(b) Clipped policy update.</b> Standard PPO surrogate: probability ratio $\rho_t = \pi_{\text{new}}/\pi_{\text{old}}$ clipped to $[0.8, 1.2]$, actor loss $-\mathbb{E}[\min(\rho_t A_t, \text{clip}(\rho_t)A_t)]$. The clip enforces a trust region so the policy can't drift too far in one update.</p>
+
+    <p><b>(c) Critic update.</b> Clipped value loss (PPO2 style): $V_\theta(S_t)$ regressed against the GAE return target, with an extra clip $V_{\text{old}} \pm \varepsilon$ limiting per-step movement. The return target now genuinely includes bootstrapped future fractions, so the critic learns to predict whole-course return-to-go.</p>
+
+    <p><b>(d) Entropy bonus.</b> Small reward (coef $0.005$) for the policy staying spread out, so the agent keeps exploring beamlet intensities rather than collapsing onto one rigid plan too early.</p>
+
+    <p>All of this runs for 6 epochs over the 280-transition batch in mini-batches of 64. Gradients are clipped to L2-norm 0.5 and Adam steps with lr = 1.5e-4. Per-batch NaN-guards re-check every gradient before <code>opt.step()</code> — any non-finite gradient skips that batch.</p>
+
+    <p><b>Checkpoints.</b> Written under <code>runs/</code>:</p>
+    <ul style="margin:6px 0 6px 18px;padding:0;color:var(--text2);font-size:13px;line-height:1.7">
+      <li><code>warmstart.pt</code> — saved <b>once</b> after Step 4a, before any PPO update. Lets you evaluate the imitation policy alone.</li>
+      <li><code>best.pt</code> — saved whenever the <b>validation DVH score</b> sets a new minimum. Every <code>best_eval_every = 25</code> patients we run deterministic rollouts on the first <code>best_n_val_patients = 6</code> patients of the eval split and save if the mean DVH score (lower is better) improved. A final validation pass at the end gives the last policy a chance to claim <code>best.pt</code> too. The old rolling-mean-reward rule is kept only as a fallback when no validation patients exist.</li>
+      <li><code>ep&lt;N&gt;.pt</code> every <code>eval_every = 50</code> patients, and <code>last.pt</code> at the end so a final checkpoint always exists.</li>
+    </ul>
+
+    <p><b>Live diagnostics in the tqdm bar.</b> Each patient prints <code>R</code> (this patient's total reward), <code>Ravg</code> (rolling mean), <code>loar</code> (the curriculum-ramped λ_oar), <code>pi</code>/<code>v</code> (policy &amp; value losses), <code>mu</code> (mean of <code>actor_mu.bias</code>), <code>lstd</code> (mean <code>log_std</code>), and <code>a_mean</code>/<code>a_max</code> (action stats). A frozen policy would show <code>mu</code> stuck at $-1.000$ and <code>a_mean</code> at $\approx 0.31$; after the warm-start those move.</p>
+  </div>
+</div>
+
+<div class="phase">Phase 3 — Evaluation (deterministic, no learning)</div>
+
+<div class="step c-green">
+  <div class="step-title">Step 11 · evaluate.py — grade the trained agent <span class="tag">deterministic=True</span></div>
+  <div class="step-sub">runs on cfg.eval_split (validation by default) · pass --split test for the final report</div>
+  <div class="step-note">
+    <p>Evaluation runs the same 35-fraction course per patient with two changes:</p>
+    <p><b>(1) Deterministic actions.</b> No random sampling; the agent always uses the policy's mean. Reproducible plans (run twice → same plan), essential for a clinical workflow.</p>
+    <p><b>(2) No learning.</b> Weights are frozen. We're measuring, not training.</p>
+    <p>For each patient we compute:</p>
+    <ul style="margin:6px 0 6px 18px;padding:0;color:var(--text2);font-size:13px;line-height:1.7">
+      <li><b>MAE</b> — average |predicted − clinical| dose, masked to the possible-dose region</li>
+      <li><b>DVH score</b> — mean over present structures of <code>|ΔD95| + |ΔDmean|</code> vs ground truth (lower is better; this is also the <code>best.pt</code> selection metric)</li>
+      <li><b>D95 per PTV</b> (full mask) — coverage of each tumour class. With the DIM downsampler now covering every target voxel, this is the headline coverage metric again.</li>
+      <li><b>D95r per PTV</b> (reachable-only) — D95 over PTV voxels with at least one non-zero DIM entry. After the downsampler fix this matches the full-mask D95 within rounding (reachability ≥ 99.5 %); kept as a guardrail against future DIM regressions.</li>
+      <li><b>%reach per PTV</b> — fraction of PTV voxels physically reachable by any beamlet. Currently 99.7–100 % across all 206 patients; was 72–76 % before the downsampler fix.</li>
+      <li><b>Mean dose per OAR</b> — for each healthy organ</li>
+    </ul>
+    <p>Results print as one aligned table with a final <code>MEAN</code> row, followed by a <b>CONFIG SNAPSHOT</b> block so the exact reward/tolerance settings are saved alongside the metrics. Structures absent for a patient show as <code>-</code> rather than misleading zeros. Pass <code>--charts-patient pt_201</code> (or <code>first</code>) to also dump per-patient DVH / dose charts.</p>
+    <p><b>Which checkpoint?</b> <code>runs/warmstart.pt</code> is the imitation-only policy; <code>runs/best.pt</code> is the best-validation-DVH policy during PPO; <code>runs/last.pt</code> is the final policy. Comparing them shows whether PPO improved on the NNLS warm-start.</p>
+  </div>
+  <div class="step-code">see <a href="evaluate.py">evaluate.py</a> · metrics in <a href="src/utils/metrics.py">src/utils/metrics.py</a> (<code>dvh_score</code>, <code>d_at_volume_reachable</code>, <code>reachable_fraction</code>)</div>
+</div>
+
+<div class="phase">Phase 4 — Web UI (Flask backend serving a browser front-end)</div>
+
+<div class="step c-blue">
+  <div class="step-title">Step 12 · app.py — JSON API around the trained agent <span class="tag tag-new">flask + flask-cors</span></div>
+  <div class="step-sub">python app.py --ckpt runs/best.pt --split validation --port 5000 [--debug]</div>
+  <div class="step-note">
+    <p><code>app.py</code> is a small Flask backend that wraps the same <code>DoseEnv</code> + <code>PPO</code> stack behind an HTTP API a browser can call. On start it loads the config, builds the env over the chosen split, instantiates the agent (12 input channels) and loads a checkpoint (<code>runs/best.pt</code> by default) in <code>eval()</code> mode. If PyTorch or the processed data aren't available it falls back to a <b>demo mode</b> that returns synthetic-but-plausible fractions, so the front-end always has something to render.</p>
+    <p>Endpoints:</p>
+    <table class="ftbl">
+      <thead><tr><th>Route</th><th>Returns</th></tr></thead>
+      <tbody>
+        <tr><td>GET /api/health</td><td>liveness + whether the real models loaded vs demo mode</td></tr>
+        <tr><td>GET /api/config</td><td>n_fractions, beam geometry, PTV prescriptions, OAR tolerances</td></tr>
+        <tr><td>GET /api/patients</td><td>list of available patient IDs (live or demo)</td></tr>
+        <tr><td>GET /api/patients/&lt;id&gt;/data</td><td>state shape + which structures the patient has</td></tr>
+        <tr><td>POST /api/patients/&lt;id&gt;/simulate</td><td><b>the main one</b> — runs the agent deterministically through all 35 fractions and returns per-fraction beam heatmaps, reward components and cumulative organ doses, plus an end-of-treatment summary</td></tr>
+        <tr><td>GET /api/patients/random</td><td>a random patient ID</td></tr>
+        <tr><td>GET /api/status</td><td>patient count, agent/config readiness, timestamp</td></tr>
+      </tbody>
+    </table>
+    <p><b>The simulate payload</b> is what drives the visualisation: for each fraction it ships the <code>9 × 16 × 16</code> beam-intensity heatmap, the <code>reward</code> / <code>ptv_reward</code> / <code>oar_penalty</code> diagnostics, and the running mean dose to every structure. The <b>summary</b> then rolls the final cumulative doses into per-PTV coverage % (achieved if ≥ 95 %) and per-OAR % of tolerance (with a <code>violation</code> flag), correctly distinguishing "not contoured for this patient" (<code>present: false</code>, null numbers) from "contoured but received 0 Gy".</p>
+    <p><b>Running it.</b> Install deps (<code>flask</code> and <code>flask-cors</code> are in <a href="requirements.txt">requirements.txt</a>), then <code>python app.py --debug</code> (defaults to port 5000, binds 0.0.0.0). The browser front-end is launched separately via <code>run_ui.bat</code> / <code>run_ui.sh</code> — see <a href="UI_README.md">UI_README.md</a>.</p>
+  </div>
+  <div class="step-code">see <a href="app.py">app.py</a> · uses <a href="src/env/dose_env.py">DoseEnv</a> + <a href="src/agents/ppo.py">PPO</a> · front-end docs in <a href="UI_README.md">UI_README.md</a></div>
+</div>
+
+<h2 style="margin-top:32px">All the defaults in one place</h2>
+<div class="kv">
+<b>mode:</b> sequential = <code>true</code> (one episode = 35-fraction course; gamma/gae_lambda LIVE) · legacy bandit via <code>sequential: false</code><br>
+<b>data:</b> raw_dir = <code>data/original</code> · processed_dir = <code>data/processed</code> · train_split = <code>train</code> · eval_split = <code>validation</code><br>
+<b>volume:</b> grid = <code>64</code> · n_fractions = <code>35</code> · max_fraction_dose = <code>3.0</code> Gy/voxel<br>
+<b>beams:</b> n_beams = <code>9</code> · beamlet_h = <code>16</code> · beamlet_w = <code>16</code> · total beamlets = <code>2 304</code><br>
+<b>prescription (Gy):</b> PTV70 = 70 · PTV63 = 63 · PTV56 = 56<br>
+<b>OAR tolerance (Gy):</b> Brainstem = 54 · SpinalCord = 45 · Mandible = 70 · LeftParotid = 26 · RightParotid = 26<br>
+<b>OAR serial flag (Dmax term):</b> Brainstem · SpinalCord = <code>true</code> &nbsp;|&nbsp; Mandible · L/R Parotid = <code>false</code><br>
+<b>OAR per-organ weights:</b> Brainstem 0.5 · SpinalCord 0.6 · Mandible 0.5 · LeftParotid 1.6 · RightParotid 1.6<br>
+<b>reward (sequential):</b> λ_phi = 1.0 · λ_oar = 0.6 (ramped) · λ_ptv = 3.5 · terminal_dvh_weight = 0.1 · oar_voxel_subweight = 1.0 · oar_mean_subweight = 0.35 · oar_dmax_subweight = 1.0<br>
+<b>shaping:</b> Φ = −λ_phi·ptv_gap_fraction − λ_oar·oar_overshoot_fraction (on cumulative dose); r = γ·Φ(s′) − Φ(s); terminal = λ_ptv·coverage − terminal_dvh_weight·dvh_score<br>
+<b>actor init (src/models/actor_critic.py):</b> ACTOR_MU_BIAS_INIT = <code>−1.0</code> · actor_log_std_init = <code>0.0</code> (σ = 1.0) · log_std clamp = <code>[−5, +2]</code> · ACTION_SCALE = <code>1.0</code> · actor_mu weight init = orthogonal(gain = 0.01)<br>
+<b>warm-start (NNLS oracle):</b> target = dose_gt / n_fractions · ptv ×50 · oar ×5 · body ×1 · FISTA (see scripts/compute_warmstart_actions.py)<br>
+<b>warm-start (supervised actor pretrain):</b> warmstart_enabled = <code>true</code> · warmstart_epochs = 30 · warmstart_minibatch = 4 · warmstart_lr = 3e-4 · updates encoder + actor_trunk + actor_mu only (log_std &amp; critic untouched)<br>
+<b>PPO:</b> γ = 0.99 (LIVE) · gae_lambda = 0.95 (LIVE) · clip_eps = 0.2 · ent_coef = 0.005 · vf_coef = 0.5 · lr = 1.5e-4 · ppo_epochs = 6 · minibatch = 64 · batch_n_patients = 8 · defensive reward/value clip = ±50 · grad clip = 0.5 · NaN-skip per batch<br>
+<b>OAR curriculum:</b> lambda_oar_ramp_episodes = 600 · lambda_oar_ramp_start_factor = 0.10 (ramps λ_oar from 0.06 → 0.6 over the first 600 patients)<br>
+<b>training:</b> total_episodes = 3500 patient-courses · 8 patients per PPO update · eval_every = 50 · device = cuda (cpu fallback) · ckpt_dir = <code>runs</code> · seed = 42<br>
+<b>best.pt selection:</b> validation DVH score (lower better) · best_n_val_patients = 6 · best_eval_every = 25 · best_rolling_window = 10 (fallback only)<br>
+<b>checkpoints:</b> <code>runs/warmstart.pt</code> (post-pretrain) · <code>runs/best.pt</code> (best val DVH) · <code>runs/ep&lt;N&gt;.pt</code> (every eval_every) · <code>runs/last.pt</code> (end of training)<br>
+<b>web UI:</b> <code>app.py</code> (Flask + flask-cors) · default <code>--ckpt runs/best.pt --split validation --port 5000</code> · front-end via run_ui.bat / run_ui.sh
+</div>
+
+</body>
+</html>
