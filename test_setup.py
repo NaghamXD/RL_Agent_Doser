@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Test script to verify RL Agent UI setup
 Checks all components and provides diagnostics
@@ -9,9 +9,9 @@ from pathlib import Path
 def check_python_version():
     """Check Python version."""
     version = sys.version_info
-    print(f"✓ Python {version.major}.{version.minor}.{version.micro}")
+    print(f"âœ“ Python {version.major}.{version.minor}.{version.micro}")
     if version.major < 3 or (version.major == 3 and version.minor < 8):
-        print("  ✗ WARNING: Python 3.8+ required")
+        print("  âœ— WARNING: Python 3.8+ required")
         return False
     return True
 
@@ -30,9 +30,9 @@ def check_dependencies():
     for package, description in packages.items():
         try:
             __import__(package)
-            print(f"✓ {package:15} ({description})")
+            print(f"âœ“ {package:15} ({description})")
         except ImportError:
-            print(f"✗ {package:15} ({description}) - MISSING")
+            print(f"âœ— {package:15} ({description}) - MISSING")
             all_ok = False
     
     return all_ok
@@ -50,9 +50,9 @@ def check_files():
     all_ok = True
     for filepath, description in files_to_check.items():
         if Path(filepath).exists():
-            print(f"✓ {filepath:30} ({description})")
+            print(f"âœ“ {filepath:30} ({description})")
         else:
-            print(f"✗ {filepath:30} ({description}) - NOT FOUND")
+            print(f"âœ— {filepath:30} ({description}) - NOT FOUND")
             all_ok = False
     
     return all_ok
@@ -72,9 +72,9 @@ def check_data():
         dirpath = Path(dirname)
         if dirpath.exists():
             items = list(dirpath.iterdir())
-            print(f"✓ {dirname:30} ({description}) - {len(items)} items")
+            print(f"âœ“ {dirname:30} ({description}) - {len(items)} items")
         else:
-            print(f"✗ {dirname:30} ({description}) - NOT FOUND")
+            print(f"âœ— {dirname:30} ({description}) - NOT FOUND")
             all_ok = False
     
     return all_ok
@@ -92,9 +92,9 @@ def check_models():
     for filepath, description in models.items():
         if Path(filepath).exists():
             size_mb = Path(filepath).stat().st_size / (1024*1024)
-            print(f"✓ {filepath:30} ({description}) - {size_mb:.1f} MB")
+            print(f"âœ“ {filepath:30} ({description}) - {size_mb:.1f} MB")
         else:
-            print(f"✗ {filepath:30} ({description}) - NOT FOUND")
+            print(f"âœ— {filepath:30} ({description}) - NOT FOUND")
             all_ok = False
     
     return all_ok
@@ -103,12 +103,12 @@ def check_patients():
     """Check available patients."""
     validation_dir = Path('data/processed/validation')
     if not validation_dir.exists():
-        print("\n✗ Validation data directory not found")
+        print("\nâœ— Validation data directory not found")
         return False
     
     patients = sorted([p.name for p in validation_dir.iterdir() if p.is_dir()])
     print()
-    print(f"✓ Found {len(patients)} patients in validation set")
+    print(f"âœ“ Found {len(patients)} patients in validation set")
     if patients:
         print(f"  Examples: {', '.join(patients[:5])}")
         if len(patients) > 5:
@@ -139,7 +139,7 @@ def main():
             result = check_func()
             results.append((name, result))
         except Exception as e:
-            print(f"✗ Error during check: {e}")
+            print(f"âœ— Error during check: {e}")
             results.append((name, False))
     
     print()
@@ -150,7 +150,7 @@ def main():
     
     all_passed = True
     for name, result in results:
-        status = "✓ PASS" if result else "✗ FAIL"
+        status = "âœ“ PASS" if result else "âœ— FAIL"
         print(f"{status:8} {name}")
         if not result:
             all_passed = False
@@ -158,7 +158,7 @@ def main():
     print()
     
     if all_passed:
-        print("✓ All checks passed! System is ready to use.")
+        print("âœ“ All checks passed! System is ready to use.")
         print()
         print("Next steps:")
         print("  1. Windows:  double-click run_ui.bat")
@@ -167,10 +167,10 @@ def main():
         print()
         return 0
     else:
-        print("✗ Some checks failed. See details above.")
+        print("âœ— Some checks failed. See details above.")
         print()
         print("Common fixes:")
-        print("  - Install dependencies: pip install -r requirements_ui.txt")
+        print("  - Install dependencies: pip install -r requirements.txt")
         print("  - Preprocess data: python scripts/preprocess.py")
         print("  - Check configs: python app.py --debug")
         print()

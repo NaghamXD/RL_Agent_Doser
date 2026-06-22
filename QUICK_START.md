@@ -1,8 +1,8 @@
-# 🎯 RL Agent UI - Quick Start Guide
+﻿# ðŸŽ¯ RL Agent UI - Quick Start Guide
 
 A complete dynamic web-based dashboard for monitoring and evaluating your RL Agent radiation therapy treatment planning system.
 
-## ⚡ 30-Second Start
+## âš¡ 30-Second Start
 
 ### For Windows Users:
 ```bash
@@ -19,11 +19,11 @@ Then open `ui.html` in your browser.
 
 ---
 
-## 📋 What You Get
+## ðŸ“‹ What You Get
 
 This UI system includes:
 
-### ✅ Features Implemented
+### âœ… Features Implemented
 
 1. **Dynamic Patient Selection**
    - Dropdown to browse all available patients
@@ -34,9 +34,9 @@ This UI system includes:
    - PTV70, PTV63, PTV56 coverage tracking
    - Progress bars showing delivery percentage
    - Color-coded status indicators:
-     - 🟢 Green: >95% coverage (excellent)
-     - 🟡 Orange: 80-95% (acceptable) 
-     - 🔴 Red: <80% (underdose - needs attention)
+     - ðŸŸ¢ Green: >95% coverage (excellent)
+     - ðŸŸ¡ Orange: 80-95% (acceptable) 
+     - ðŸ”´ Red: <80% (underdose - needs attention)
 
 3. **OAR Monitoring (5 Organs)**
    - Real-time dose tracking for:
@@ -73,12 +73,12 @@ This UI system includes:
 
 ---
 
-## 🚀 Installation Steps
+## ðŸš€ Installation Steps
 
 ### Step 1: Install Dependencies (One-Time Only)
 
 ```bash
-pip install -r requirements_ui.txt
+pip install -r requirements.txt
 ```
 
 This installs:
@@ -124,20 +124,20 @@ Open `ui.html` in your web browser:
 
 ---
 
-## 📖 Using the Dashboard
+## ðŸ“– Using the Dashboard
 
 ### Workflow
 
 1. **Select a Patient**
    ```
-   Patient Selection dropdown → Choose from patients
+   Patient Selection dropdown â†’ Choose from patients
    OR
-   "🎲 Random Patient" button → Get random patient
+   "ðŸŽ² Random Patient" button â†’ Get random patient
    ```
 
 2. **Run Simulation**
    ```
-   Click "▶️ Run Simulation"
+   Click "â–¶ï¸ Run Simulation"
    Wait for evaluation to complete
    See results in dashboard
    ```
@@ -172,52 +172,52 @@ Open `ui.html` in your web browser:
 
 ---
 
-## 🎨 Dashboard Layout
+## ðŸŽ¨ Dashboard Layout
 
 ```
-┌─────────────────────────────────────────────────┐
-│          HEADER: System Status & Config         │
-├─────────────────────────────────────────────────┤
-│                                                  │
-│    CONTROL PANEL: Patient Selection & Run       │
-│                                                  │
-├─────────────────────────────────────────────────┤
-│                                                  │
-│    ┌──────────────┐  ┌──────────────────────┐   │
-│    │ PTV Coverage │  │ OAR Monitoring       │   │
-│    ├──────────────┤  ├──────────────────────┤   │
-│    │ PTV70: 95%  │  │ Brainstem: 42/54 Gy │   │
-│    │ PTV63: 88%  │  │ SpinalCord: 38/45  │   │
-│    │ PTV56: 92%  │  │ [etc...]           │   │
-│    └──────────────┘  └──────────────────────┘   │
-│                                                  │
-│    ┌──────────────┐  ┌──────────────────────┐   │
-│    │Fraction      │  │ Reward Trend        │   │
-│    │Metrics       │  │ (Line Chart)        │   │
-│    └──────────────┘  └──────────────────────┘   │
-│                                                  │
-│    FRACTION TIMELINE: [Fx1] [Fx2] [Fx3] ...    │
-│                                                  │
-│    BEAM SELECTOR: [1] [2] [3] .... [9]         │
-│    ┌─────────────────────────────────────────┐ │
-│    │     DOSE HEATMAP (Selected Beam)       │ │
-│    │     (Interactive Canvas)                │ │
-│    └─────────────────────────────────────────┘ │
-│                                                  │
-│    AGENT PERFORMANCE: Stats Summary Cards       │
-│                                                  │
-└─────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚          HEADER: System Status & Config         â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                  â”‚
+â”‚    CONTROL PANEL: Patient Selection & Run       â”‚
+â”‚                                                  â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                  â”‚
+â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚    â”‚ PTV Coverage â”‚  â”‚ OAR Monitoring       â”‚   â”‚
+â”‚    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤   â”‚
+â”‚    â”‚ PTV70: 95%  â”‚  â”‚ Brainstem: 42/54 Gy â”‚   â”‚
+â”‚    â”‚ PTV63: 88%  â”‚  â”‚ SpinalCord: 38/45  â”‚   â”‚
+â”‚    â”‚ PTV56: 92%  â”‚  â”‚ [etc...]           â”‚   â”‚
+â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                                                  â”‚
+â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚    â”‚Fraction      â”‚  â”‚ Reward Trend        â”‚   â”‚
+â”‚    â”‚Metrics       â”‚  â”‚ (Line Chart)        â”‚   â”‚
+â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                                                  â”‚
+â”‚    FRACTION TIMELINE: [Fx1] [Fx2] [Fx3] ...    â”‚
+â”‚                                                  â”‚
+â”‚    BEAM SELECTOR: [1] [2] [3] .... [9]         â”‚
+â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚    â”‚     DOSE HEATMAP (Selected Beam)       â”‚ â”‚
+â”‚    â”‚     (Interactive Canvas)                â”‚ â”‚
+â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                  â”‚
+â”‚    AGENT PERFORMANCE: Stats Summary Cards       â”‚
+â”‚                                                  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
-## 🔧 Files Created
+## ðŸ”§ Files Created
 
 | File | Purpose |
 |------|---------|
 | `app.py` | Flask REST API backend |
 | `ui.html` | React-based interactive dashboard |
-| `requirements_ui.txt` | Python dependencies |
+| `requirements.txt` | Python dependencies |
 | `UI_README.md` | Full documentation |
 | `run_ui.bat` | Windows launcher script |
 | `run_ui.sh` | Mac/Linux launcher script |
@@ -225,22 +225,22 @@ Open `ui.html` in your web browser:
 
 ---
 
-## 🐛 Common Issues & Fixes
+## ðŸ› Common Issues & Fixes
 
 ### Issue: "Cannot connect to server"
 ```
 Error: Failed to load data: Error: NetworkError when attempting to fetch resource
 
 Fix 1: Check if Flask is running
-→ Open http://localhost:5000/api/health in browser
-→ Should see: {"status": "ok", "timestamp": "..."}
+â†’ Open http://localhost:5000/api/health in browser
+â†’ Should see: {"status": "ok", "timestamp": "..."}
 
 Fix 2: Change port if 5000 is in use
-→ python app.py --port 5001
+â†’ python app.py --port 5001
 
 Fix 3: Check firewall
-→ Windows: Allow Python through firewall
-→ Mac: System Preferences > Security & Privacy
+â†’ Windows: Allow Python through firewall
+â†’ Mac: System Preferences > Security & Privacy
 ```
 
 ### Issue: "No patients found"
@@ -248,12 +248,12 @@ Fix 3: Check firewall
 Error: Patient list is empty
 
 Causes:
-→ Data not preprocessed (run scripts/preprocess.py first)
-→ Wrong data split folder
-→ Missing dose_influence_matrix files
+â†’ Data not preprocessed (run scripts/preprocess.py first)
+â†’ Wrong data split folder
+â†’ Missing dose_influence_matrix files
 
 Fix: Check that this folder exists and has subfolders
-→ data/processed/validation/pt_xxx/ (with dose_influence_matrix.npz)
+â†’ data/processed/validation/pt_xxx/ (with dose_influence_matrix.npz)
 ```
 
 ### Issue: "CORS Error"
@@ -261,9 +261,9 @@ Fix: Check that this folder exists and has subfolders
 Error: Access to XMLHttpRequest blocked by CORS policy
 
 Fix: CORS is enabled in app.py, but ensure:
-→ Frontend is accessing http://localhost:5000
-→ Not mixing http/https
-→ Backend Flask server is running
+â†’ Frontend is accessing http://localhost:5000
+â†’ Not mixing http/https
+â†’ Backend Flask server is running
 ```
 
 ### Issue: "Slow simulation"
@@ -271,27 +271,27 @@ Fix: CORS is enabled in app.py, but ensure:
 Simulation takes >5 seconds per fraction
 
 Solutions:
-→ Close other programs
-→ Use GPU (if available): check config.device = "cuda"
-→ Reduce simulation fractions in app.py line ~150
+â†’ Close other programs
+â†’ Use GPU (if available): check config.device = "cuda"
+â†’ Reduce simulation fractions in app.py line ~150
 ```
 
 ---
 
-## 🔌 API Reference (Advanced)
+## ðŸ”Œ API Reference (Advanced)
 
 All endpoints return JSON. Base URL: `http://localhost:5000/api`
 
 ### Get Available Patients
 ```bash
 GET /patients
-→ {"patients": ["pt_201", "pt_202", ...], "total_count": 42}
+â†’ {"patients": ["pt_201", "pt_202", ...], "total_count": 42}
 ```
 
 ### Get System Config
 ```bash
 GET /config
-→ {
+â†’ {
     "n_fractions": 35,
     "n_beams": 9,
     "ptv_names": ["PTV70", "PTV63", "PTV56"],
@@ -304,13 +304,13 @@ GET /config
 ### Get Random Patient
 ```bash
 GET /patients/random
-→ {"patient_id": "pt_245"}
+â†’ {"patient_id": "pt_245"}
 ```
 
 ### Run Simulation
 ```bash
 POST /patients/pt_201/simulate
-→ {
+â†’ {
     "patient_id": "pt_201",
     "fractions": [
         {
@@ -329,20 +329,20 @@ POST /patients/pt_201/simulate
 
 ---
 
-## 📊 Example Dashboard Workflow
+## ðŸ“Š Example Dashboard Workflow
 
 ### Scenario: Evaluating New Patient Plan
 
 1. **Load System**
    ```
-   ✓ Start server (run_ui.bat)
-   ✓ Open ui.html
-   ✓ See system status: "System Active"
+   âœ“ Start server (run_ui.bat)
+   âœ“ Open ui.html
+   âœ“ See system status: "System Active"
    ```
 
 2. **Select Patient**
    ```
-   Dropdown → pt_245
+   Dropdown â†’ pt_245
    ```
 
 3. **Run Simulation**
@@ -355,16 +355,16 @@ POST /patients/pt_201/simulate
    ```
    Timeline shows: Fraction 1-5
    PTV Coverage:
-   - PTV70: 94% ✓ (Good)
-   - PTV63: 97% ✓ (Excellent)
-   - PTV56: 96% ✓ (Excellent)
+   - PTV70: 94% âœ“ (Good)
+   - PTV63: 97% âœ“ (Excellent)
+   - PTV56: 96% âœ“ (Excellent)
    
    OAR Status:
-   - Brainstem: 42/54 Gy ✓ OK
-   - SpinalCord: 40/45 Gy ✓ OK
-   - Mandible: 65/70 Gy ✓ OK
-   - Left Parotid: 22/26 Gy ✓ OK
-   - Right Parotid: 24/26 Gy ✓ OK
+   - Brainstem: 42/54 Gy âœ“ OK
+   - SpinalCord: 40/45 Gy âœ“ OK
+   - Mandible: 65/70 Gy âœ“ OK
+   - Left Parotid: 22/26 Gy âœ“ OK
+   - Right Parotid: 24/26 Gy âœ“ OK
    
    Reward: 0.847 (Good!)
    OAR Penalty: 0.023 (Minimal)
@@ -372,8 +372,8 @@ POST /patients/pt_201/simulate
 
 5. **Explore Beams**
    ```
-   Click Beam 3 → See heatmap
-   Click Beam 7 → See different angle
+   Click Beam 3 â†’ See heatmap
+   Click Beam 7 â†’ See different angle
    Notice how dose is distributed
    ```
 
@@ -386,7 +386,7 @@ POST /patients/pt_201/simulate
 
 ---
 
-## 💡 Customization Tips
+## ðŸ’¡ Customization Tips
 
 ### Change Color Theme
 Edit `ui.html`, search for `:root {`:
@@ -403,7 +403,7 @@ Find the `Dashboard` component in `ui.html`, add new `<div className="card">`:
 ```jsx
 <div className="card">
     <div className="card-title">
-        <span className="card-icon">📊</span>
+        <span className="card-icon">ðŸ“Š</span>
         Your Metric
     </div>
     {/* Your content */}
@@ -418,14 +418,14 @@ while not patient_done and fraction_idx < min(10, n_fractions):  # Show 10 fract
 
 ---
 
-## 🔐 Security Notes
+## ðŸ” Security Notes
 
-⚠️ **For Development Only**
+âš ï¸ **For Development Only**
 
 Current setup has:
-- ✗ No authentication
-- ✗ CORS enabled (localhost only)
-- ✗ No HTTPS
+- âœ— No authentication
+- âœ— CORS enabled (localhost only)
+- âœ— No HTTPS
 
 **Before deploying to production:**
 - Add user authentication
@@ -436,7 +436,7 @@ Current setup has:
 
 ---
 
-## 📞 Need Help?
+## ðŸ“ž Need Help?
 
 1. **Check Flask output**
    ```bash
@@ -446,7 +446,7 @@ Current setup has:
 
 2. **Check browser console**
    ```
-   F12 → Console tab → Check for JavaScript errors
+   F12 â†’ Console tab â†’ Check for JavaScript errors
    ```
 
 3. **Test API manually**
@@ -461,7 +461,7 @@ Current setup has:
 
 ---
 
-## 🎉 What's Next?
+## ðŸŽ‰ What's Next?
 
 After getting the basic UI running:
 
@@ -491,4 +491,4 @@ After getting the basic UI running:
 
 **Version**: 1.0  
 **Created**: June 2026  
-**Status**: ✅ Ready to Use
+**Status**: âœ… Ready to Use

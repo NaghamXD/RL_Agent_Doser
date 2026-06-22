@@ -1,12 +1,12 @@
-# RL Agent UI - Complete System Overview
+﻿# RL Agent UI - Complete System Overview
 
-## 📊 Project Summary
+## ðŸ“Š Project Summary
 
 I've built a complete **dynamic web-based dashboard UI** for your RL Agent radiation therapy treatment planning system. This includes a modern interactive frontend, REST API backend, and comprehensive documentation.
 
 ---
 
-## 🎯 What Was Delivered
+## ðŸŽ¯ What Was Delivered
 
 ### 1. **Flask Backend API** (`app.py`)
 - REST API server with 8+ endpoints
@@ -52,11 +52,11 @@ I've built a complete **dynamic web-based dashboard UI** for your RL Agent radia
 - **setup.py** - System verification utility
 
 ### 5. **Python Requirements**
-- `requirements_ui.txt` - All necessary Python dependencies
+- `requirements.txt` - All necessary Python dependencies
 
 ---
 
-## 🎨 UI Features
+## ðŸŽ¨ UI Features
 
 ### Patient Selection
 - **Dropdown**: Browse all available patients from `data/processed/validation/`
@@ -66,13 +66,13 @@ I've built a complete **dynamic web-based dashboard UI** for your RL Agent radia
 ### Treatment Visualization (3 PTV Buckets)
 ```
 PTV70 (70 Gy prescription):
-████████████░░ 92%  ✓ Good
+â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–‘â–‘ 92%  âœ“ Good
 
 PTV63 (63 Gy prescription):
-████████░░░░░░ 68%  ⚠ Needs work
+â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–‘â–‘â–‘â–‘â–‘â–‘ 68%  âš  Needs work
 
 PTV56 (56 Gy prescription):
-███████████░░░ 88%  ✓ Good
+â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–‘â–‘â–‘ 88%  âœ“ Good
 ```
 
 - Color-coded status indicators
@@ -81,16 +81,16 @@ PTV56 (56 Gy prescription):
 
 ### OAR Monitoring (5 Organs)
 ```
-Brainstem:        42/54 Gy ✓ OK
-SpinalCord:       38/45 Gy ✓ OK
-Mandible:         65/70 Gy ⚠ WATCH
-LeftParotid:      22/26 Gy ✓ OK
-RightParotid:     24/26 Gy ✓ OK
+Brainstem:        42/54 Gy âœ“ OK
+SpinalCord:       38/45 Gy âœ“ OK
+Mandible:         65/70 Gy âš  WATCH
+LeftParotid:      22/26 Gy âœ“ OK
+RightParotid:     24/26 Gy âœ“ OK
 ```
 
 - Real-time dose tracking
 - Tolerance limit comparison
-- Violation detection (✗ VIOLATION alert)
+- Violation detection (âœ— VIOLATION alert)
 - Color-coded severity
 
 ### Fraction-by-Fraction Progress
@@ -120,37 +120,37 @@ RightParotid:     24/26 Gy ✓ OK
 
 ---
 
-## 🚀 How It Works
+## ðŸš€ How It Works
 
 ### Architecture Diagram
 ```
-┌─ Modern Web Browser ─┐
-│  React Dashboard     │
-│  (ui.html)           │
-└──────┬───────────────┘
-       │ HTTP REST API
-       │ (JSON)
-       ▼
-┌─ Flask Backend ─────┐
-│  (app.py)            │
-│  - /api/patients     │
-│  - /api/simulate     │
-│  - /api/config       │
-└──────┬───────────────┘
-       │ Python API
-       │ (numpy arrays)
-       ▼
-┌─ RL System ──────────┐
-│  DoseEnv             │
-│  PPO Agent           │
-│  Dose Matrices       │
-│  Patient Data        │
-└──────────────────────┘
+â”Œâ”€ Modern Web Browser â”€â”
+â”‚  React Dashboard     â”‚
+â”‚  (ui.html)           â”‚
+â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â”‚ HTTP REST API
+       â”‚ (JSON)
+       â–¼
+â”Œâ”€ Flask Backend â”€â”€â”€â”€â”€â”
+â”‚  (app.py)            â”‚
+â”‚  - /api/patients     â”‚
+â”‚  - /api/simulate     â”‚
+â”‚  - /api/config       â”‚
+â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â”‚ Python API
+       â”‚ (numpy arrays)
+       â–¼
+â”Œâ”€ RL System â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  DoseEnv             â”‚
+â”‚  PPO Agent           â”‚
+â”‚  Dose Matrices       â”‚
+â”‚  Patient Data        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### Data Flow
 ```
-1. User selects patient → API query
+1. User selects patient â†’ API query
 2. API loads patient data from disk
 3. API runs agent simulation (5 fractions)
 4. Agent computes doses & rewards
@@ -161,7 +161,7 @@ RightParotid:     24/26 Gy ✓ OK
 
 ---
 
-## 📁 Files Created
+## ðŸ“ Files Created
 
 | File | Size | Purpose |
 |------|------|---------|
@@ -169,7 +169,7 @@ RightParotid:     24/26 Gy ✓ OK
 | `ui.html` | ~900 lines | React dashboard (embedded) |
 | `UI_README.md` | ~500 lines | Full documentation |
 | `QUICK_START.md` | ~400 lines | Quick start guide |
-| `requirements_ui.txt` | ~10 lines | Python dependencies |
+| `requirements.txt` | ~10 lines | Python dependencies |
 | `run_ui.bat` | ~30 lines | Windows launcher |
 | `run_ui.sh` | ~30 lines | Mac/Linux launcher |
 | `test_setup.py` | ~200 lines | System verification |
@@ -177,14 +177,14 @@ RightParotid:     24/26 Gy ✓ OK
 
 ---
 
-## 💻 Installation (3 Steps)
+## ðŸ’» Installation (3 Steps)
 
-### Step 1️⃣: Install Dependencies
+### Step 1ï¸âƒ£: Install Dependencies
 ```bash
-pip install -r requirements_ui.txt
+pip install -r requirements.txt
 ```
 
-### Step 2️⃣: Start Backend
+### Step 2ï¸âƒ£: Start Backend
 **Windows:**
 ```bash
 run_ui.bat
@@ -200,7 +200,7 @@ Or manually:
 python app.py --config configs/default.yaml --ckpt runs/best.pt --port 5000
 ```
 
-### Step 3️⃣: Open Frontend
+### Step 3ï¸âƒ£: Open Frontend
 ```
 Open ui.html in your browser
 Or: http://localhost:8000/ui.html (if using HTTP server)
@@ -208,45 +208,45 @@ Or: http://localhost:8000/ui.html (if using HTTP server)
 
 ---
 
-## 🎯 Key Features at a Glance
+## ðŸŽ¯ Key Features at a Glance
 
-✅ **Dynamic Patient Selection**
+âœ… **Dynamic Patient Selection**
 - Dropdown list auto-populated from data folder
 - Random patient picker
 - Live patient count display
 
-✅ **3 PTV Tracking Buckets**
+âœ… **3 PTV Tracking Buckets**
 - PTV70, PTV63, PTV56 coverage
 - Prescription-based targets
 - Color-coded progress (green/orange/red)
 - Real-time percentage display
 
-✅ **5 OAR Monitoring**
+âœ… **5 OAR Monitoring**
 - Brainstem, SpinalCord, Mandible, LeftParotid, RightParotid
 - Dose vs. tolerance comparison
 - Violation detection
 - Severity indicators
 
-✅ **Fraction Progress Display**
+âœ… **Fraction Progress Display**
 - Interactive timeline (up to 35 fractions)
 - Per-fraction metrics collection
 - Selectable fraction detail view
 - Progress visualization
 
-✅ **Dose Maps per Beam**
+âœ… **Dose Maps per Beam**
 - 9 beam selector buttons
 - 2D heatmap visualization
 - Color intensity mapping
 - Beamlet alignment grid
 
-✅ **Agent Monitoring Dashboard**
+âœ… **Agent Monitoring Dashboard**
 - Real-time reward tracking
 - OAR/PTV penalty breakdown
 - Action statistics
 - Performance trend charts
 - Agent efficiency metrics
 
-✅ **Additional Useful GUI**
+âœ… **Additional Useful GUI**
 - System status header
 - Health indicators
 - Treatment summary cards
@@ -257,7 +257,7 @@ Or: http://localhost:8000/ui.html (if using HTTP server)
 
 ---
 
-## 🔧 API Endpoints Reference
+## ðŸ”§ API Endpoints Reference
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
@@ -272,7 +272,7 @@ Or: http://localhost:8000/ui.html (if using HTTP server)
 
 ---
 
-## 🎨 Design Highlights
+## ðŸŽ¨ Design Highlights
 
 ### Color Scheme
 - **Primary**: Blue (#3b82f6) - Main UI elements
@@ -288,14 +288,14 @@ Or: http://localhost:8000/ui.html (if using HTTP server)
 
 ### User Experience
 - Icon indicators for quick scanning
-- Status badges (✓ OK / ❌ VIOLATION)
+- Status badges (âœ“ OK / âŒ VIOLATION)
 - Tooltips on hover
 - Click-to-explore pattern
 - Real-time updates
 
 ---
 
-## 🚀 Quick Verification
+## ðŸš€ Quick Verification
 
 To verify everything is working:
 
@@ -304,16 +304,16 @@ To verify everything is working:
 python test_setup.py
 
 # Expected output:
-# ✓ Python 3.9.0
-# ✓ flask (Flask web framework)
-# ✓ flask_cors (CORS support)
+# âœ“ Python 3.9.0
+# âœ“ flask (Flask web framework)
+# âœ“ flask_cors (CORS support)
 # ... [all checks pass]
-# ✓ All checks passed! System is ready to use.
+# âœ“ All checks passed! System is ready to use.
 ```
 
 ---
 
-## 📊 Example Usage Scenario
+## ðŸ“Š Example Usage Scenario
 
 ### Scenario: Evaluate Plan for Patient pt_245
 
@@ -325,24 +325,24 @@ Open ui.html
 
 **Step 2: Select Patient**
 ```
-Dropdown → Select "pt_245"
+Dropdown â†’ Select "pt_245"
 ```
 
 **Step 3: Run Simulation**
 ```
-Button: "▶️ Run Simulation"
+Button: "â–¶ï¸ Run Simulation"
 Wait ~5-10 seconds
 ```
 
 **Step 4: Review Results**
 ```
-✓ PTV70: 94% coverage
-✓ PTV63: 97% coverage  
-✓ PTV56: 96% coverage
+âœ“ PTV70: 94% coverage
+âœ“ PTV63: 97% coverage  
+âœ“ PTV56: 96% coverage
 
-✓ Brainstem: 42/54 Gy
-✓ SpinalCord: 40/45 Gy
-✗ Mandible: 71/70 Gy (VIOLATION)
+âœ“ Brainstem: 42/54 Gy
+âœ“ SpinalCord: 40/45 Gy
+âœ— Mandible: 71/70 Gy (VIOLATION)
 
 Reward: 0.847
 OAR Penalty: 0.156
@@ -350,21 +350,21 @@ OAR Penalty: 0.156
 
 **Step 5: Explore Details**
 ```
-Click Beam 3 → View heatmap
-Click Fraction 2 → See progression
+Click Beam 3 â†’ View heatmap
+Click Fraction 2 â†’ See progression
 Chart shows rewards improving over fractions
 ```
 
 ---
 
-## 🔐 Security Notes
+## ðŸ” Security Notes
 
-⚠️ **Current Setup**: For **development/testing only**
+âš ï¸ **Current Setup**: For **development/testing only**
 
 **Has:**
-- ✗ No authentication
-- ✗ No HTTPS
-- ✗ CORS enabled (localhost only)
+- âœ— No authentication
+- âœ— No HTTPS
+- âœ— CORS enabled (localhost only)
 
 **For Production:**
 - Add user authentication (OAuth, JWT)
@@ -376,7 +376,7 @@ Chart shows rewards improving over fractions
 
 ---
 
-## 📈 Performance
+## ðŸ“ˆ Performance
 
 | Metric | Value |
 |--------|-------|
@@ -388,65 +388,65 @@ Chart shows rewards improving over fractions
 
 ---
 
-## 🎓 File Structure After Setup
+## ðŸŽ“ File Structure After Setup
 
 ```
 RL_Agent/
-├── app.py                 ← Flask backend
-├── ui.html                ← React frontend (open this!)
-├── test_setup.py          ← System verification
-├── run_ui.bat             ← Windows launcher
-├── run_ui.sh              ← Mac/Linux launcher
-├── UI_README.md           ← Full documentation
-├── QUICK_START.md         ← Quick start (READ THIS FIRST!)
-├── requirements_ui.txt    ← Python dependencies
-├── requirements.txt       ← Original requirements
-├── configs/
-│   └── default.yaml
-├── src/
-│   ├── env/
-│   │   ├── dose_env.py    ← Environment
-│   │   ├── reward.py      ← Reward function
-│   ├── agents/
-│   │   └── ppo.py         ← PPO agent
-│   └── ...
-├── runs/
-│   ├── best.pt            ← Best model
-│   └── ...
-├── data/
-│   └── processed/
-│       └── validation/    ← Patient data
-└── [other existing files]
+â”œâ”€â”€ app.py                 â† Flask backend
+â”œâ”€â”€ ui.html                â† React frontend (open this!)
+â”œâ”€â”€ test_setup.py          â† System verification
+â”œâ”€â”€ run_ui.bat             â† Windows launcher
+â”œâ”€â”€ run_ui.sh              â† Mac/Linux launcher
+â”œâ”€â”€ UI_README.md           â† Full documentation
+â”œâ”€â”€ QUICK_START.md         â† Quick start (READ THIS FIRST!)
+â”œâ”€â”€ requirements.txt    â† Python dependencies
+â”œâ”€â”€ requirements.txt       â† Original requirements
+â”œâ”€â”€ configs/
+â”‚   â””â”€â”€ default.yaml
+â”œâ”€â”€ src/
+â”‚   â”œâ”€â”€ env/
+â”‚   â”‚   â”œâ”€â”€ dose_env.py    â† Environment
+â”‚   â”‚   â”œâ”€â”€ reward.py      â† Reward function
+â”‚   â”œâ”€â”€ agents/
+â”‚   â”‚   â””â”€â”€ ppo.py         â† PPO agent
+â”‚   â””â”€â”€ ...
+â”œâ”€â”€ runs/
+â”‚   â”œâ”€â”€ best.pt            â† Best model
+â”‚   â””â”€â”€ ...
+â”œâ”€â”€ data/
+â”‚   â””â”€â”€ processed/
+â”‚       â””â”€â”€ validation/    â† Patient data
+â””â”€â”€ [other existing files]
 ```
 
 ---
 
-## 🆘 Troubleshooting
+## ðŸ†˜ Troubleshooting
 
 ### "Can't connect to server"
-→ Check if Flask is running: `curl http://localhost:5000/api/health`
+â†’ Check if Flask is running: `curl http://localhost:5000/api/health`
 
 ### "No patients found"
-→ Run preprocessing: `python scripts/preprocess.py`
+â†’ Run preprocessing: `python scripts/preprocess.py`
 
 ### "Port 5000 in use"
-→ Use different port: `python app.py --port 5001`
+â†’ Use different port: `python app.py --port 5001`
 
 ### "Slow simulation"
-→ Close other programs, use GPU if available
+â†’ Close other programs, use GPU if available
 
 ### "CORS errors"
-→ Ensure backend is running before opening UI
+â†’ Ensure backend is running before opening UI
 
 ---
 
-## 📚 Documentation Files
+## ðŸ“š Documentation Files
 
 1. **QUICK_START.md** (this directory)
    - 30-second setup
    - Common issues & fixes
    - Usage examples
-   - **START HERE** 👈
+   - **START HERE** ðŸ‘ˆ
 
 2. **UI_README.md** (this directory)
    - Complete documentation
@@ -462,17 +462,17 @@ RL_Agent/
 
 ---
 
-## 🎉 You're All Set!
+## ðŸŽ‰ You're All Set!
 
 Your RL Agent now has a **professional, interactive web-based dashboard** for:
-- ✅ Patient selection (dropdown + random)
-- ✅ 3 PTV coverage tracking with buckets
-- ✅ 5 OAR dose monitoring
-- ✅ Fraction-by-fraction progress visualization
-- ✅ Dose maps per beam (9 beams)
-- ✅ Real-time agent performance metrics
-- ✅ Beautiful, responsive UI
-- ✅ Complete REST API backend
+- âœ… Patient selection (dropdown + random)
+- âœ… 3 PTV coverage tracking with buckets
+- âœ… 5 OAR dose monitoring
+- âœ… Fraction-by-fraction progress visualization
+- âœ… Dose maps per beam (9 beams)
+- âœ… Real-time agent performance metrics
+- âœ… Beautiful, responsive UI
+- âœ… Complete REST API backend
 
 ### Next Steps:
 1. Read `QUICK_START.md`
@@ -483,17 +483,17 @@ Your RL Agent now has a **professional, interactive web-based dashboard** for:
 
 ---
 
-## 📞 Support Resources
+## ðŸ“ž Support Resources
 
 - **Quick Start**: QUICK_START.md
 - **Full Docs**: UI_README.md
-- **API Ref**: UI_README.md → API Endpoints section
+- **API Ref**: UI_README.md â†’ API Endpoints section
 - **Verify Setup**: `python test_setup.py`
 - **Debug**: `python app.py --debug`
 
 ---
 
-**Status**: ✅ **Ready to Use!**  
+**Status**: âœ… **Ready to Use!**  
 **Version**: 1.0  
 **Created**: June 2026  
 **Configuration**: Works with existing RL Agent codebase

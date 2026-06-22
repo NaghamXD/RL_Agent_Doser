@@ -1,47 +1,47 @@
-# 🎯 RL Agent UI System - Getting Started
+﻿# ðŸŽ¯ RL Agent UI System - Getting Started
 
-## 👋 Welcome!
+## ðŸ‘‹ Welcome!
 
 I've built you a **complete dynamic web-based dashboard** for your RL Agent radiation therapy treatment planning system. Here's how to get started in 3 minutes.
 
 ---
 
-## ⚡ Quick Start (Choose Your Path)
+## âš¡ Quick Start (Choose Your Path)
 
-### 🟢 I want to start immediately (Windows)
+### ðŸŸ¢ I want to start immediately (Windows)
 ```bash
 1. Double-click: run_ui.bat
 2. Wait 10 seconds
 3. Open ui.html in browser
-Done! 🎉
+Done! ðŸŽ‰
 ```
 
-### 🟢 I want to start immediately (Mac/Linux)
+### ðŸŸ¢ I want to start immediately (Mac/Linux)
 ```bash
 1. Terminal: chmod +x run_ui.sh
 2. Terminal: ./run_ui.sh
 3. Open ui.html in browser
-Done! 🎉
+Done! ðŸŽ‰
 ```
 
-### 🟡 I want to understand what I'm getting first
-👉 Read: **PROJECT_SUMMARY.md** (5 min read)
+### ðŸŸ¡ I want to understand what I'm getting first
+ðŸ‘‰ Read: **PROJECT_SUMMARY.md** (5 min read)
 
-### 🔵 I want detailed instructions
-👉 Read: **QUICK_START.md** (10 min read)
+### ðŸ”µ I want detailed instructions
+ðŸ‘‰ Read: **QUICK_START.md** (10 min read)
 
-### 🔴 Something isn't working
-👉 Skip to: **Troubleshooting** (below)
+### ðŸ”´ Something isn't working
+ðŸ‘‰ Skip to: **Troubleshooting** (below)
 
 ---
 
-## 📋 Complete Documentation Index
+## ðŸ“‹ Complete Documentation Index
 
 ### Quick Reference Files
 
 | File | Purpose | Read Time |
 |------|---------|-----------|
-| **START HERE →** | This file | 2 min |
+| **START HERE â†’** | This file | 2 min |
 | **PROJECT_SUMMARY.md** | What was built, features overview | 5 min |
 | **QUICK_START.md** | Step-by-step setup & usage | 10 min |
 | **UI_README.md** | Full technical documentation | 20 min |
@@ -60,46 +60,46 @@ Done! 🎉
 |------|---------|----------|
 | `run_ui.bat` | Launch backend (Windows) | Windows |
 | `run_ui.sh` | Launch backend (Mac/Linux) | Mac/Linux |
-| `requirements_ui.txt` | Python dependencies | All |
+| `requirements.txt` | Python dependencies | All |
 
 ---
 
-## 🎯 What You Get
+## ðŸŽ¯ What You Get
 
 ### Dashboard Features
 
-✅ **Patient Selection**
+âœ… **Patient Selection**
 - Browse all available patients in dropdown
 - Random patient picker
 - Live patient count
 
-✅ **3 PTV Coverage Tracking**
+âœ… **3 PTV Coverage Tracking**
 - PTV70, PTV63, PTV56
 - Progress bars with color coding
 - Prescription dose limits
 
-✅ **5 OAR Monitoring**
+âœ… **5 OAR Monitoring**
 - Brainstem, SpinalCord, Mandible, LeftParotid, RightParotid
 - Dose vs. tolerance tracking
 - Violation detection
 
-✅ **Fraction-by-Fraction Progress**
+âœ… **Fraction-by-Fraction Progress**
 - Interactive timeline (35 fractions)
 - Per-fraction metrics
 - Reward tracking
 
-✅ **Dose Maps per Beam**
+âœ… **Dose Maps per Beam**
 - All 9 beams displayed
 - Heatmap visualization
 - Color-coded intensity
 
-✅ **Agent Performance Monitoring**
+âœ… **Agent Performance Monitoring**
 - Real-time reward metrics
 - OAR/PTV penalty breakdown
 - Action statistics
 - Trend charts
 
-✅ **Professional UI**
+âœ… **Professional UI**
 - Responsive design (mobile/tablet/desktop)
 - Modern glassmorphism styling
 - Real-time animations
@@ -107,7 +107,7 @@ Done! 🎉
 
 ---
 
-## 🚀 Installation
+## ðŸš€ Installation
 
 ### Option 1: Automated (Recommended)
 
@@ -124,7 +124,7 @@ double-click: run_ui.bat
 ### Option 2: Manual
 
 ```bash
-1. pip install -r requirements_ui.txt
+1. pip install -r requirements.txt
 2. python app.py --config configs/default.yaml --ckpt runs/best.pt
 3. Open ui.html in browser
 ```
@@ -140,7 +140,7 @@ double-click: run_ui.bat
 
 ---
 
-## 📖 Usage Workflow
+## ðŸ“– Usage Workflow
 
 1. **Start System**
    - Run launcher script or Flask app
@@ -167,7 +167,7 @@ double-click: run_ui.bat
 
 ---
 
-## 🎨 Dashboard Sections
+## ðŸŽ¨ Dashboard Sections
 
 ### Header
 - System status indicator
@@ -197,7 +197,7 @@ double-click: run_ui.bat
 
 ---
 
-## 🔍 File Overview
+## ðŸ” File Overview
 
 ### Essential Files
 
@@ -251,17 +251,17 @@ double-click: run_ui.bat
 
 ---
 
-## 🆘 Quick Troubleshooting
+## ðŸ†˜ Quick Troubleshooting
 
 ### Problem: "Can't connect to backend"
 ```
 Solution 1: Check if Flask is running
-  → Open http://localhost:5000/api/health in browser
-  → Should show: {"status": "ok", ...}
+  â†’ Open http://localhost:5000/api/health in browser
+  â†’ Should show: {"status": "ok", ...}
 
 Solution 2: Check port
-  → Port 5000 might be in use
-  → Try: python app.py --port 5001
+  â†’ Port 5000 might be in use
+  â†’ Try: python app.py --port 5001
 ```
 
 ### Problem: "No patients in dropdown"
@@ -297,11 +297,11 @@ Solution: This is usually OK if:
   - Check browser console (F12) for exact error
 ```
 
-**Still stuck?** → Read QUICK_START.md Troubleshooting section
+**Still stuck?** â†’ Read QUICK_START.md Troubleshooting section
 
 ---
 
-## 📊 System Requirements
+## ðŸ“Š System Requirements
 
 ### Minimum
 - Python 3.8+
@@ -323,11 +323,11 @@ Solution: This is usually OK if:
 - SciPy
 - YAML
 
-(Install all with: `pip install -r requirements_ui.txt`)
+(Install all with: `pip install -r requirements.txt`)
 
 ---
 
-## 🎯 Key Concepts
+## ðŸŽ¯ Key Concepts
 
 ### PTV (Planning Target Volumes)
 - Tumors or regions to treat
@@ -350,7 +350,7 @@ Solution: This is usually OK if:
 ### Beams
 - Radiation directions
 - Project uses 9 beams
-- Each beam has 16×16 beamlets
+- Each beam has 16Ã—16 beamlets
 - UI visualizes dose per beam
 
 ### Dose Map
@@ -361,7 +361,7 @@ Solution: This is usually OK if:
 
 ---
 
-## 🎓 Documentation Roadmap
+## ðŸŽ“ Documentation Roadmap
 
 **5-Minute Path:**
 1. Read this file (you're here)
@@ -393,7 +393,7 @@ Solution: This is usually OK if:
 
 ---
 
-## 🚀 Next Steps After Setup
+## ðŸš€ Next Steps After Setup
 
 1. **Explore the Dashboard**
    - Try different patients
@@ -421,14 +421,14 @@ Solution: This is usually OK if:
 
 ---
 
-## 📞 Where to Get Help
+## ðŸ“ž Where to Get Help
 
 ### Quick Reference
 - **System doesn't start**: See Quick Troubleshooting above
 - **Usage questions**: Read QUICK_START.md
 - **Technical details**: Read UI_README.md
-- **API examples**: Read UI_README.md → API section
-- **Code customization**: Read UI_README.md → Development section
+- **API examples**: Read UI_README.md â†’ API section
+- **Code customization**: Read UI_README.md â†’ Development section
 
 ### Verify Installation
 ```bash
@@ -448,16 +448,16 @@ python app.py --debug
 ```
 
 ### Browser Console
-Press F12 → Console tab → Check for JavaScript errors
+Press F12 â†’ Console tab â†’ Check for JavaScript errors
 
 ---
 
-## ✅ Pre-Flight Checklist
+## âœ… Pre-Flight Checklist
 
 Before you start, make sure you have:
 
 - [ ] Python 3.8+ installed (`python --version`)
-- [ ] Project dependencies installed (`pip install -r requirements_ui.txt`)
+- [ ] Project dependencies installed (`pip install -r requirements.txt`)
 - [ ] Processed data exists (`data/processed/validation/` with pt_xxx folders)
 - [ ] Model checkpoint exists (`runs/best.pt`)
 - [ ] Modern web browser available
@@ -470,7 +470,7 @@ python test_setup.py
 
 ---
 
-## 🎉 Let's Go!
+## ðŸŽ‰ Let's Go!
 
 You're ready to use your new dashboard!
 
@@ -481,7 +481,7 @@ You're ready to use your new dashboard!
 1. Double-click: run_ui.bat
 2. Wait for "Backend ready!" message
 3. Click: ui.html
-4. Enjoy! 🎉
+4. Enjoy! ðŸŽ‰
 ```
 
 **Mac/Linux:**
@@ -489,12 +489,12 @@ You're ready to use your new dashboard!
 1. Terminal: ./run_ui.sh
 2. Wait for "Backend ready!" message
 3. Open: ui.html
-4. Enjoy! 🎉
+4. Enjoy! ðŸŽ‰
 ```
 
 ---
 
-## 📚 Document Quick Links
+## ðŸ“š Document Quick Links
 
 | I want to... | Read this |
 |--------------|-----------|
@@ -510,7 +510,7 @@ You're ready to use your new dashboard!
 ---
 
 **Version**: 1.0  
-**Status**: ✅ Ready to Use  
+**Status**: âœ… Ready to Use  
 **Created**: June 2026
 
 **Questions?** Check the Troubleshooting section above first!  
@@ -518,14 +518,14 @@ You're ready to use your new dashboard!
 
 ---
 
-## 🎨 One Final Thing
+## ðŸŽ¨ One Final Thing
 
 The UI is fully customizable! Want to:
-- ✏️ Change colors? Edit CSS in ui.html
-- 📊 Add metrics? Add React components in ui.html
-- 🔧 Extend API? Add endpoints in app.py
-- 🎯 New features? Modify React state/effects
+- âœï¸ Change colors? Edit CSS in ui.html
+- ðŸ“Š Add metrics? Add React components in ui.html
+- ðŸ”§ Extend API? Add endpoints in app.py
+- ðŸŽ¯ New features? Modify React state/effects
 
-See UI_README.md → Development section for examples.
+See UI_README.md â†’ Development section for examples.
 
-**Ready? Let's go!** 🚀
+**Ready? Let's go!** ðŸš€

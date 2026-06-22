@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 
 # RL Agent UI - Quick Start Script for Linux/Mac
 
@@ -23,7 +23,7 @@ python3 -c "import flask" 2>/dev/null
 if [ $? -ne 0 ]; then
     echo ""
     echo "[!] Dependencies not found. Installing..."
-    pip3 install -r requirements_ui.txt
+    pip3 install -r requirements.txt
     if [ $? -ne 0 ]; then
         echo "ERROR: Failed to install dependencies"
         exit 1
