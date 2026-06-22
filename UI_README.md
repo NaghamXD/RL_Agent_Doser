@@ -1,4 +1,4 @@
-.\.venv\Scripts\Activate.ps1
+﻿.\.venv\Scripts\Activate.ps1
 python app.py --debug
 python -m http.server 8000
 http://localhost:8000/dashboard.html
@@ -9,7 +9,7 @@ http://localhost:8000/dashboard.html
 
 A modern, interactive web dashboard for visualizing and monitoring RL Agent-based radiation therapy treatment planning.
 
-## 🎯 Features
+## ðŸŽ¯ Features
 
 ### Dashboard Components
 - **Patient Selection** - Choose from available patients or select randomly
@@ -43,19 +43,19 @@ A modern, interactive web dashboard for visualizing and monitoring RL Agent-base
   - Treatment progress tracker
   - Agent state visualization
 
-## 📋 Prerequisites
+## ðŸ“‹ Prerequisites
 
 - Python 3.8+
 - The existing RL Agent codebase with trained models
 - A modern web browser (Chrome, Firefox, Safari, Edge)
 
-## 🚀 Quick Start
+## ðŸš€ Quick Start
 
 ### 1. Install Dependencies
 
 ```bash
 # Install UI-specific requirements
-pip install -r requirements_ui.txt
+pip install -r requirements.txt
 ```
 
 ### 2. Start the Backend Server
@@ -97,16 +97,16 @@ python -m http.server 8000 --directory .
 # Then open: http://localhost:8000/ui.html
 ```
 
-## 📖 Usage Guide
+## ðŸ“– Usage Guide
 
 ### Main Workflow
 
 1. **Select a Patient**
    - Use the dropdown to select from available patients
-   - Click "🎲 Random Patient" to pick a random patient
+   - Click "ðŸŽ² Random Patient" to pick a random patient
 
 2. **Run Simulation**
-   - Click "▶️ Run Simulation" to start the agent evaluation
+   - Click "â–¶ï¸ Run Simulation" to start the agent evaluation
    - The system will simulate up to 5 fractions for the selected patient
    - Progress will be displayed as the simulation runs
 
@@ -127,14 +127,14 @@ python -m http.server 8000 --directory .
 #### PTV Coverage Card
 - Shows dose delivery progress for each target
 - Color indicators:
-  - 🟢 Green: >95% coverage (excellent)
-  - 🟡 Orange: 80-95% coverage (acceptable)
-  - 🔴 Red: <80% coverage (underdose)
+  - ðŸŸ¢ Green: >95% coverage (excellent)
+  - ðŸŸ¡ Orange: 80-95% coverage (acceptable)
+  - ðŸ”´ Red: <80% coverage (underdose)
 
 #### OAR Monitoring Card
 - Lists each organ with current dose
 - Compares against tolerance limits
-- Shows violation status (✓ OK / ❌ VIOLATION)
+- Shows violation status (âœ“ OK / âŒ VIOLATION)
 
 #### Fraction Metrics Card
 - Total reward for current fraction
@@ -157,7 +157,7 @@ python -m http.server 8000 --directory .
 - Total fractions evaluated
 - Average reward across all fractions
 
-## 🔌 API Endpoints
+## ðŸ”Œ API Endpoints
 
 The Flask backend provides the following REST APIs:
 
@@ -188,7 +188,7 @@ curl http://localhost:5000/api/config
 curl -X POST http://localhost:5000/api/patients/pt_201/simulate
 ```
 
-## 🎨 UI Design Features
+## ðŸŽ¨ UI Design Features
 
 - **Modern Gradient Theme**: Blue-Purple primary colors with semantic color coding
 - **Responsive Grid Layout**: Automatically adapts to desktop/tablet/mobile
@@ -204,7 +204,7 @@ curl -X POST http://localhost:5000/api/patients/pt_201/simulate
 - Warning: Amber (#f59e0b)
 - Neutral: Gray (#1f2937, #f3f4f6)
 
-## 🔧 Architecture
+## ðŸ”§ Architecture
 
 ### Backend (`app.py`)
 - Flask REST API server
@@ -221,19 +221,19 @@ curl -X POST http://localhost:5000/api/patients/pt_201/simulate
 ### Data Flow
 ```
 UI (React) 
-    ↓ (HTTP REST)
+    â†“ (HTTP REST)
 Flask API (app.py)
-    ↓ (Python API)
+    â†“ (Python API)
 DoseEnv (dose_env.py)
-    ↓
+    â†“
 PPO Agent (ppo.py)
-    ↓
+    â†“
 Dose Influence Matrix
-    ↓
+    â†“
 Patient Treatment Plan
 ```
 
-## 📊 Supported Structures
+## ðŸ“Š Supported Structures
 
 ### Planning Target Volumes (PTVs)
 - **PTV70**: 70 Gy prescription
@@ -247,56 +247,56 @@ Patient Treatment Plan
 - **LeftParotid**: 26 Gy tolerance
 - **RightParotid**: 26 Gy tolerance
 
-## 🐛 Troubleshooting
+## ðŸ› Troubleshooting
 
 ### Backend Won't Start
 ```
 Error: Port 5000 already in use
-→ Use --port flag: python app.py --port 5001
+â†’ Use --port flag: python app.py --port 5001
 ```
 
 ### CORS Error in Browser Console
 ```
 Error: Access to XMLHttpRequest blocked by CORS policy
-→ CORS is already enabled in app.py. Ensure backend is running.
+â†’ CORS is already enabled in app.py. Ensure backend is running.
 ```
 
 ### Can't Connect to Backend
 ```
 Error: Failed to load data
-→ Check if Flask server is running on http://localhost:5000
-→ Try: curl http://localhost:5000/api/health
+â†’ Check if Flask server is running on http://localhost:5000
+â†’ Try: curl http://localhost:5000/api/health
 ```
 
 ### No Patients Visible
 ```
-→ Ensure processed data exists in: data/processed/validation/
-→ Verify config split path is correct
-→ Run preprocessing script first: python scripts/preprocess.py
+â†’ Ensure processed data exists in: data/processed/validation/
+â†’ Verify config split path is correct
+â†’ Run preprocessing script first: python scripts/preprocess.py
 ```
 
 ### Simulation Takes Too Long
 ```
-→ Reduce number of fractions simulated in app.py (currently 5)
-→ Use faster GPU if available: check --device flag
-→ Close other applications
+â†’ Reduce number of fractions simulated in app.py (currently 5)
+â†’ Use faster GPU if available: check --device flag
+â†’ Close other applications
 ```
 
-## 📈 Performance Metrics
+## ðŸ“ˆ Performance Metrics
 
 - **Frontend Load**: ~2-3 seconds (initial data fetch)
 - **Simulation Time**: ~1-2 seconds per fraction (depends on hardware)
 - **Chart Rendering**: <500ms
 - **API Response**: <100ms (except simulation)
 
-## 🔐 Security Notes
+## ðŸ” Security Notes
 
 - No authentication implemented (add if exposing to network)
 - CORS enabled for localhost only (configure for production)
 - No data persistence to disk
 - Ensure access to sensitive patient data is restricted
 
-## 🎓 Development & Customization
+## ðŸŽ“ Development & Customization
 
 ### Adding New Metrics
 
@@ -305,7 +305,7 @@ Edit the `Dashboard` component in `ui.html` to add new cards:
 ```jsx
 <div className="card">
     <div className="card-title">
-        <span className="card-icon">📊</span>
+        <span className="card-icon">ðŸ“Š</span>
         New Metric
     </div>
     {/* Content here */}
@@ -341,29 +341,29 @@ def your_endpoint():
     return jsonify({'data': 'value'})
 ```
 
-## 📝 File Structure
+## ðŸ“ File Structure
 
 ```
 RL_Agent/
-├── app.py                  # Flask backend API
-├── ui.html                 # React frontend dashboard
-├── requirements_ui.txt     # Python dependencies for UI
-├── UI_README.md           # This file
-├── src/
-│   ├── env/
-│   │   ├── dose_env.py    # Environment definition
-│   │   └── reward.py      # Reward calculation
-│   ├── agents/
-│   │   └── ppo.py         # PPO agent implementation
-│   └── config.py          # Configuration
-├── runs/
-│   ├── best.pt            # Best trained model
-│   └── eval_*.txt         # Evaluation results
-└── data/
-    └── processed/         # Preprocessed patient data
+â”œâ”€â”€ app.py                  # Flask backend API
+â”œâ”€â”€ ui.html                 # React frontend dashboard
+â”œâ”€â”€ requirements.txt     # Python dependencies for UI
+â”œâ”€â”€ UI_README.md           # This file
+â”œâ”€â”€ src/
+â”‚   â”œâ”€â”€ env/
+â”‚   â”‚   â”œâ”€â”€ dose_env.py    # Environment definition
+â”‚   â”‚   â””â”€â”€ reward.py      # Reward calculation
+â”‚   â”œâ”€â”€ agents/
+â”‚   â”‚   â””â”€â”€ ppo.py         # PPO agent implementation
+â”‚   â””â”€â”€ config.py          # Configuration
+â”œâ”€â”€ runs/
+â”‚   â”œâ”€â”€ best.pt            # Best trained model
+â”‚   â””â”€â”€ eval_*.txt         # Evaluation results
+â””â”€â”€ data/
+    â””â”€â”€ processed/         # Preprocessed patient data
 ```
 
-## 🚀 Future Enhancements
+## ðŸš€ Future Enhancements
 
 - [ ] 3D dose visualization (Three.js)
 - [ ] Dose-Volume Histogram (DVH) charts
@@ -376,7 +376,7 @@ RL_Agent/
 - [ ] Custom reward function editor
 - [ ] Integration with TPS software
 
-## 📞 Support
+## ðŸ“ž Support
 
 For issues or questions:
 1. Check the Troubleshooting section
@@ -384,7 +384,7 @@ For issues or questions:
 3. Open browser developer tools (F12) for JavaScript errors
 4. Check API connectivity: `curl http://localhost:5000/api/health`
 
-## 📄 License
+## ðŸ“„ License
 
 Same as parent RL Agent project.
 

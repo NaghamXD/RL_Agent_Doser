@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 REM RL Agent UI - Quick Start Script for Windows
 
 echo.
@@ -24,7 +24,7 @@ pip show flask >nul 2>&1
 if %errorlevel% neq 0 (
     echo.
     echo [!] Flask not found. Installing dependencies...
-    pip install -r requirements_ui.txt
+    pip install -r requirements.txt
     if %errorlevel% neq 0 (
         echo ERROR: Failed to install dependencies
         pause
