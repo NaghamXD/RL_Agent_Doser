@@ -118,6 +118,12 @@
         .error-banner.show { display:block; }
         .reward-chart-wrap { height:140px; position:relative; }
         .reward-chart-canvas { width:100% !important; height:100% !important; }
+        .decomp-wrap { height:150px; position:relative; }
+        .decomp-wrap canvas { width:100% !important; height:100% !important; }
+        .dvh-wrap { height:320px; position:relative; }
+        .dvh-wrap canvas { width:100% !important; height:100% !important; }
+        .chart-legend { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; }
+        .chart-note { font-size:11px; color:var(--muted); margin-top:10px; line-height:1.5; }
         ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
     </style>
 </head>
@@ -210,6 +216,19 @@
             </div>
 
             <div class="section-card">
+                <div class="section-title">⚖️ Reward Components <span class="tag">PTV vs OAR per fraction</span></div>
+                <div class="decomp-wrap"><canvas id="decompChart"></canvas></div>
+                <div class="chart-note">Per-fraction diagnostics: <span style="color:var(--success)">+λ<sub>ptv</sub>·ptv_reward</span> (up) and <span style="color:var(--danger)">−λ<sub>oar</sub>·oar_penalty</span> (down). The amber outline marks the current fraction.</div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">📉 Dose–Volume Histogram <span class="tag">End of course</span></div>
+                <div class="dvh-wrap"><canvas id="dvhChart"></canvas></div>
+                <div class="chart-legend" id="dvhLegend"></div>
+                <div class="chart-note">Cumulative DVH over all fractions. Solid = PTV (target), dashed = OAR. Faint vertical line = prescription / tolerance. X = dose (Gy), Y = % of structure volume receiving ≥ that dose.</div>
+            </div>
+
+            <div class="section-card">
                 <div class="section-title">🔥 Beam Intensity Map <span class="tag">9 beams · 16×16 beamlets</span></div>
                 <div class="beam-grid" id="beamGrid"></div>
                 <div class="colorbar"><span>Low</span><div class="colorbar-gradient"></div><span>High</span></div>
@@ -253,6 +272,12 @@ const patientSelect = $('patientSelect'), randomBtn = $('randomBtn'),
 
 const PTV_COLORS = { PTV70:'#4f8ef7', PTV63:'#a78bfa', PTV56:'#34d399' };
 const OAR_ICONS  = { Brainstem:'🧠', SpinalCord:'🦴', Mandible:'🦷', LeftParotid:'💧', RightParotid:'💧' };
+// Per-structure line colours for the DVH (PTVs reuse PTV_COLORS).
+const DVH_COLORS = {
+    PTV70:'#4f8ef7', PTV63:'#a78bfa', PTV56:'#34d399',
+    Brainstem:'#f59e0b', SpinalCord:'#ef4444', Mandible:'#ec4899',
+    LeftParotid:'#14b8a6', RightParotid:'#38bdf8'
+};
 
 function num(v, d=3) { const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(d); }
 function doseColor(dose, max) { const t=Math.max(0,Math.min(1,dose/(max||1))); return `hsl(${(1-t)*240},100%,55%)`; }
@@ -371,6 +396,81 @@ function drawRewardChart() {
     ctx.fillStyle='var(--warning)'; ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fill();
 }
 
+// Reward decomposition — PTV contribution (up) vs OAR contribution (down) per fraction.
+function drawRewardDecomp() {
+    if (!simData) return;
+    const canvas = $('decompChart');
+    const W = canvas.offsetWidth, H = canvas.offsetHeight;
+    if (!W || !H) return;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,W,H);
+    const padL=46, padR=12, padT=10, padB=14;
+    const plotW=W-padL-padR, plotH=H-padT-padB;
+    const fr = simData.fractions;
+    const ptv = fr.map(f => (f.lambda_ptv ?? 1) * (f.ptv_reward || 0));
+    const oar = fr.map(f => -(f.lambda_oar ?? 1) * (f.oar_penalty || 0));
+    const maxV = Math.max(0.001, ...ptv.map(Math.abs), ...oar.map(Math.abs));
+    const half = plotH/2, zY = padT + half;
+    const yv = v => zY - (v/maxV)*half;
+    // zero baseline
+    ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(padL,zY); ctx.lineTo(W-padR,zY); ctx.stroke();
+    const n=fr.length, gap=plotW/n, bw=Math.max(1.5, gap*0.66);
+    fr.forEach((f,i) => {
+        const cx = padL + i*gap + (gap-bw)/2;
+        ctx.fillStyle='rgba(34,197,94,0.85)';
+        ctx.fillRect(cx, yv(ptv[i]), bw, zY - yv(ptv[i]));
+        ctx.fillStyle='rgba(239,68,68,0.85)';
+        ctx.fillRect(cx, zY, bw, yv(oar[i]) - zY);
+        if (i===fracIdx) { ctx.strokeStyle='#f59e0b'; ctx.lineWidth=1.5; ctx.strokeRect(cx-1, padT, bw+2, plotH); }
+    });
+    ctx.fillStyle='#8892b0'; ctx.font='10px sans-serif'; ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText('+'+maxV.toFixed(2), padL-6, padT+5);
+    ctx.fillText('0', padL-6, zY);
+    ctx.fillText('-'+maxV.toFixed(2), padL-6, padT+plotH-5);
+}
+
+// Dose–Volume Histogram — one cumulative curve per structure.
+function drawDVH() {
+    if (!simData || !simData.dvh) return;
+    const canvas = $('dvhChart');
+    const W = canvas.offsetWidth, H = canvas.offsetHeight;
+    if (!W || !H) return;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,W,H);
+    const padL=44, padR=14, padT=12, padB=34;
+    const plotW=W-padL-padR, plotH=H-padT-padB, maxDose=80;
+    const x = d => padL + (d/maxDose)*plotW;
+    const y = v => padT + (1 - v/100)*plotH;   // v in %
+    // grid + axis labels
+    ctx.font='10px sans-serif';
+    ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+    ctx.textAlign='right'; ctx.textBaseline='middle'; ctx.fillStyle='#8892b0';
+    for (let v=0; v<=100; v+=20) { const yy=y(v); ctx.beginPath(); ctx.moveTo(padL,yy); ctx.lineTo(W-padR,yy); ctx.stroke(); ctx.fillText(v+'%', padL-6, yy); }
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    for (let d=0; d<=maxDose; d+=10) { const xx=x(d); ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.beginPath(); ctx.moveTo(xx,padT); ctx.lineTo(xx,padT+plotH); ctx.stroke(); ctx.fillStyle='#8892b0'; ctx.fillText(d, xx, padT+plotH+6); }
+    ctx.fillText('Dose (Gy)', padL+plotW/2, H-13);
+    // curves
+    const ptvSet = new Set(config.ptv_names || []);
+    let legend = '';
+    for (const [name, curve] of Object.entries(simData.dvh)) {
+        const col = DVH_COLORS[name] || '#8892b0';
+        const isPtv = ptvSet.has(name);
+        // reference vertical line (prescription for PTV, tolerance for OAR)
+        const ref = isPtv ? (config.ptv_prescriptions||{})[name] : (config.oar_tolerances||{})[name];
+        if (ref) { ctx.save(); ctx.globalAlpha=0.3; ctx.strokeStyle=col; ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(x(ref),padT); ctx.lineTo(x(ref),padT+plotH); ctx.stroke(); ctx.restore(); }
+        ctx.strokeStyle=col; ctx.lineWidth=isPtv?2.4:1.6; ctx.setLineDash(isPtv?[]:[5,4]);
+        ctx.beginPath();
+        curve.dose.forEach((d,i) => { const xx=x(d), yy=y(curve.volume[i]*100); i===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy); });
+        ctx.stroke();
+        legend += `<span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)"><span style="width:16px;border-top:${isPtv?'2px solid':'2px dashed'} ${col};display:inline-block"></span>${name}</span>`;
+    }
+    ctx.setLineDash([]);
+    $('dvhLegend').innerHTML = legend;
+}
+
 // Beam heatmap
 function drawHeatmap(beamData, canvasId) {
     const canvas = $(canvasId); if(!canvas) return;
@@ -412,7 +512,7 @@ function renderFraction() {
     $('mAction').textContent = num(f.action_max,3);
     updateSidebar(f);
     renderBeams(f);
-    requestAnimationFrame(drawRewardChart);
+    requestAnimationFrame(() => { drawRewardChart(); drawRewardDecomp(); drawDVH(); });
 }
 
 // Summary
@@ -509,6 +609,8 @@ async function runSimulation() {
             action_max:             typeof f.action_max      ==='number'?f.action_max:0,
             beam_heatmap:           f.beam_heatmap           ||[],
             cumulative_organ_doses: f.cumulative_organ_doses ||{},
+            lambda_oar:             typeof f.lambda_oar      ==='number'?f.lambda_oar:1,
+            lambda_ptv:             typeof f.lambda_ptv      ==='number'?f.lambda_ptv:1,
         }));
         fracIdx = 0;
         buildFracTrack(simData.fractions.length);
@@ -526,7 +628,7 @@ prevBtn.addEventListener('click', ()=>{ if(fracIdx>0){fracIdx--;renderFraction()
 nextBtn.addEventListener('click', ()=>{ if(simData&&fracIdx<simData.fractions.length-1){fracIdx++;renderFraction();} });
 summaryBtn.addEventListener('click', renderSummary);
 backToFracBtn.addEventListener('click', ()=>{ showSimView(); renderFraction(); });
-window.addEventListener('resize', ()=>{ if(simData) drawRewardChart(); });
+window.addEventListener('resize', ()=>{ if(simData){ drawRewardChart(); drawRewardDecomp(); drawDVH(); } });
 
 loadInitialData();
 </script>
