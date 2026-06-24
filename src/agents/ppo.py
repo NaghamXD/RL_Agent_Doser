@@ -187,6 +187,7 @@ class PPO:
         n_transitions = states.shape[0]
         shuffled_indices = np.arange(n_transitions)
         stats = {"policy_loss": 0.0, "value_loss": 0.0, "entropy": 0.0}
+        n_updates = 0
         for _epoch in range(self.cfg.ppo_epochs):
             np.random.shuffle(shuffled_indices)
             for batch_start in range(0, n_transitions, self.cfg.minibatch):
@@ -252,6 +253,19 @@ class PPO:
                 stats["policy_loss"] += policy_loss.item()
                 stats["value_loss"]  += value_loss.item()
                 stats["entropy"]     += entropy.item()
+                n_updates += 1
+        # Report per-minibatch means, not sums over all ppo_epochs *
+        # minibatches -- otherwise these numbers grow with ppo_epochs /
+        # minibatch size and are meaningless to compare across runs or
+        # plot alongside each other.
+        if n_updates > 0:
+            stats["policy_loss"] /= n_updates
+            stats["value_loss"]  /= n_updates
+            stats["entropy"]     /= n_updates
+        else:
+            stats["policy_loss"] = float("nan")
+            stats["value_loss"]  = float("nan")
+            stats["entropy"]     = float("nan")
         return stats
 
     # ------------------------------------------------------------ warm-start
