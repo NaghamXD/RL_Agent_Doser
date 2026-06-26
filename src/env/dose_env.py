@@ -84,6 +84,11 @@ class DoseEnv:
         )
         self.gamma: float = float(getattr(cfg, "gamma", 0.99))
 
+        # State-channel ablation toggle (see Config.include_beam_paths).
+        self.include_beam_paths: bool = bool(
+            getattr(cfg, "include_beam_paths", True)
+        )
+
     # ------------------------------------------------------------------ utils
     def _structure_masks(self) -> Dict[str, np.ndarray]:
         """``{structure_name: (G, G, G) binary mask}`` for all loaded structures."""
@@ -282,7 +287,7 @@ class DoseEnv:
         ch S+1     : cumulative_dose / 70
         ch S+2     : per-voxel dose gap (prescription - cumulative_dose),
                      clipped >= 0, /70
-        ch S+3     : beam paths
+        ch S+3     : beam paths (only if cfg.include_beam_paths)
         """
         ct = self._data["ct"][None]                                     # (1,G,G,G)
         structure_masks = self._data["masks"]                            # (S,G,G,G)
@@ -292,10 +297,9 @@ class DoseEnv:
                     0.0, None)[None]
             / 70.0
         )
-        beam_paths = self._data["beam_paths"][None]
-        state = np.concatenate(
-            [ct, structure_masks, cumulative_dose_channel,
-             ptv_dose_gap_channel, beam_paths],
-            axis=0,
-        )
+        channels = [ct, structure_masks, cumulative_dose_channel,
+                   ptv_dose_gap_channel]
+        if self.include_beam_paths:
+            channels.append(self._data["beam_paths"][None])
+        state = np.concatenate(channels, axis=0)
         return state.astype(np.float32)

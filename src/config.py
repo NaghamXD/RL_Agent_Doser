@@ -33,6 +33,15 @@ class Config:
     beamlet_h: int = 16
     beamlet_w: int = 16
 
+    # Include the precomputed per-patient beam-path channel (1 of 12) in the
+    # state tensor. False drops it -> in_channels becomes 11. in_channels is
+    # inferred at runtime from _build_state's actual output shape (see
+    # train.py/evaluate.py: `in_channels = initial_state.shape[0]`), so this
+    # flag alone is sufficient to resize the network -- no other code change
+    # needed. Checkpoints are NOT compatible across different values of this
+    # flag (different in_channels -> different first Conv3d shape).
+    include_beam_paths: bool = True
+
     prescription: Dict[str, float] = field(default_factory=lambda: {
         "PTV70": 70.0, "PTV63": 63.0, "PTV56": 56.0,
     })
