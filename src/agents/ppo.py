@@ -20,6 +20,18 @@ import torch.nn as nn
 from ..config import Config, resolve_device
 from ..models.actor_critic import (ActorCritic, ACTION_SCALE,
                                    ACTOR_LOG_STD_INIT, ACTOR_LOG_STD_MAX)
+from ..models.encoder import orthogonal_init
+
+# Orthogonal init at the standard gain (sqrt(2)) independently NaNs MPS's
+# Conv3d backward pass within one warm-start epoch -- confirmed reproducible
+# with the real train.py entrypoint (see configs/default.yaml's
+# device-pinning comment; an earlier mirrored-script test that looked clean
+# turned out to consume RNG state in a different order than train.py and
+# was not a faithful reproduction). Dampening the gain on just the
+# warm-start-trainable layers (encoder + actor_trunk) keeps initial
+# activations/gradients small enough for MPS's kernels to stay finite.
+# CPU/CUDA are untouched and keep the standard gain.
+_MPS_INIT_GAIN = 0.1
 
 
 @dataclass
@@ -50,6 +62,14 @@ class PPO:
             log_std_max=float(getattr(cfg, "actor_log_std_max",
                                       ACTOR_LOG_STD_MAX)),
         ).to(self.device)
+        if self.device.type == "mps":
+            for module in self.net.encoder.conv:
+                if isinstance(module, nn.Conv3d):
+                    orthogonal_init(module, _MPS_INIT_GAIN)
+            orthogonal_init(self.net.encoder.proj, _MPS_INIT_GAIN)
+            for module in self.net.actor_trunk:
+                if isinstance(module, nn.Linear):
+                    orthogonal_init(module, _MPS_INIT_GAIN)
         self.opt = torch.optim.Adam(self.net.parameters(), lr=cfg.lr)
 
     # ------------------------------------------------------------ act
@@ -324,6 +344,13 @@ class PPO:
         self.net.train()
         first_epoch_mse = float("nan")
         last_epoch_mse  = float("nan")
+        # MPS: Huber caps the gradient magnitude a squared error would
+        # produce on a bad early prediction, and skipped non-finite steps
+        # are recorded instead of corrupting the net (see _MPS_INIT_GAIN
+        # comment above for why this device needs the extra guard).
+        on_mps = self.device.type == "mps"
+        loss_fn = nn.SmoothL1Loss(beta=1.0) if on_mps else None
+        skipped_steps = 0
 
         try:
             for epoch_index in range(epochs):
@@ -349,23 +376,31 @@ class PPO:
                     predicted_mu = self.net.actor_mu(
                         self.net.actor_trunk(features)
                     )
-                    loss = ((predicted_mu - batch_target_raw) ** 2).mean()
+                    loss = (loss_fn(predicted_mu, batch_target_raw) if on_mps
+                            else ((predicted_mu - batch_target_raw) ** 2).mean())
 
                     optimizer.zero_grad()
                     loss.backward()
-                    nn.utils.clip_grad_norm_(trainable_params, 1.0)
+                    grad_norm = nn.utils.clip_grad_norm_(trainable_params, 1.0)
+
+                    if on_mps and not torch.isfinite(grad_norm):
+                        skipped_steps += 1
+                        optimizer.zero_grad()
+                        continue
+
                     optimizer.step()
 
                     running_sum  += float(loss.item()) * len(batch_idx)
                     running_seen += len(batch_idx)
 
-                epoch_mse = running_sum / max(running_seen, 1)
+                epoch_mse = running_sum / max(running_seen, 1) if running_seen else float("nan")
                 if epoch_index == 0:
                     first_epoch_mse = epoch_mse
                 last_epoch_mse = epoch_mse
                 print(
                     f"  [warmstart] epoch {epoch_index + 1}/{epochs}  "
                     f"mse={epoch_mse:.4f}"
+                    + (f"  skipped={skipped_steps}" if on_mps else "")
                 )
         finally:
             if not was_training:

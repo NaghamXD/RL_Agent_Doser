@@ -175,3 +175,15 @@ lambda_oar_ramp_start_factor: 0.10
 best_n_val_patients: 40
 best_eval_every:     25
 best_rolling_window: 10
+
+# --- early stopping ---
+# Stops training once val_dvh goes >early_stop_patience_evals checks
+# without a >early_stop_min_delta relative improvement (after the OAR
+# curriculum has fully ramped -- see src/utils/early_stopping.py). 8 evals
+# at best_eval_every=25 is ~200 episodes of patience post-ramp. Motivating
+# case: a 3500-episode MPS run peaked at episode 174 then ran all the way
+# to 3500 while the policy collapsed to ~5x worse with nothing to stop it;
+# patience=8 would have caught it at episode 399. best.pt is unaffected
+# either way since it's saved independently whenever val_dvh improves.
+early_stop_patience_evals: 8
+early_stop_min_delta:      0.005
