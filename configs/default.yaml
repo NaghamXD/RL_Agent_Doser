@@ -77,6 +77,13 @@ terminal_dvh_weight:  0.1
 # Patient trajectories collected per PPO update (advantages normalised across).
 batch_n_patients:     8
 
+# --- reward-shaping ablation (see src/env/reward.py module docstring and
+# scripts/sweep_reward_shaping.py) -- all 3 default to old behaviour here;
+# this default.yaml is not where the comparison happens.
+ptv_gap_power:              1.0    # A: 1.0=old linear, 2.0=quadratic
+oar_barrier_steepness:      null   # B: null=old hard threshold, e.g. 2.0=soft barrier
+terminal_use_soft_coverage: false  # C: false=old hard step, true=sigmoid
+
 # --- actor exploration (log-std) ---
 # The actor mu is warm-started onto the static FISTA-NNLS plan. Start the
 # global, state-independent log-std HIGH so PPO actively deviates from that

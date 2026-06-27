@@ -243,12 +243,18 @@ class DoseEnv:
                 self.cfg.oar_tolerance,
                 lambda_phi=self.lambda_phi, lambda_oar=self.lambda_oar,
                 organ_weights=self.cfg.oar_weights,
+                ptv_gap_power=getattr(self.cfg, "ptv_gap_power", 1.0),
+                oar_barrier_steepness=getattr(
+                    self.cfg, "oar_barrier_steepness", None),
             )
             phi_after = reward_module.sequential_potential(
                 self.cumulative_dose, prescription_volume, oar_masks,
                 self.cfg.oar_tolerance,
                 lambda_phi=self.lambda_phi, lambda_oar=self.lambda_oar,
                 organ_weights=self.cfg.oar_weights,
+                ptv_gap_power=getattr(self.cfg, "ptv_gap_power", 1.0),
+                oar_barrier_steepness=getattr(
+                    self.cfg, "oar_barrier_steepness", None),
             )
             reward = self.gamma * phi_after - phi_before
             if patient_done:
@@ -261,6 +267,8 @@ class DoseEnv:
                     self.cfg.prescription, dvh,
                     lambda_ptv=self.lambda_ptv,
                     terminal_dvh_weight=self.terminal_dvh_weight,
+                    use_soft_coverage=getattr(
+                        self.cfg, "terminal_use_soft_coverage", False),
                 )
                 reward += terminal
                 info["terminal_reward"] = float(terminal)
