@@ -246,6 +246,8 @@ class DoseEnv:
                 ptv_gap_power=getattr(self.cfg, "ptv_gap_power", 1.0),
                 oar_barrier_steepness=getattr(
                     self.cfg, "oar_barrier_steepness", None),
+                oar_barrier_activation_threshold=getattr(
+                    self.cfg, "oar_barrier_activation_threshold", None),
             )
             phi_after = reward_module.sequential_potential(
                 self.cumulative_dose, prescription_volume, oar_masks,
@@ -255,6 +257,8 @@ class DoseEnv:
                 ptv_gap_power=getattr(self.cfg, "ptv_gap_power", 1.0),
                 oar_barrier_steepness=getattr(
                     self.cfg, "oar_barrier_steepness", None),
+                oar_barrier_activation_threshold=getattr(
+                    self.cfg, "oar_barrier_activation_threshold", None),
             )
             reward = self.gamma * phi_after - phi_before
             if patient_done:

@@ -60,6 +60,23 @@ VARIANTS: dict[str, dict] = {
                         oar_barrier_steepness=None, lambda_phi=2.0),
     "C_A_B":       dict(terminal_use_soft_coverage=True,  ptv_gap_power=2.0,
                         oar_barrier_steepness=2.0,  lambda_phi=2.0),
+    # C_A_B's soft barrier has no floor (exp(-steepness) at zero dose is
+    # still > 0), so lambda_oar fights a constant tax everywhere instead of
+    # pressure concentrated near the tolerance line -- see
+    # reports/reward_shaping_sweep.md. v2_barrier zeroes the barrier below
+    # 80% utilization and softens the ramp (k 2.0 -> 1.5) to compensate for
+    # the narrower activation window. v2_full additionally raises
+    # terminal_dvh_weight (0.1 -> 0.4) since dvh_score here is large
+    # specifically from OAR overdose vs the reference plan. Isolated into
+    # two variants (mirrors the C -> C_A -> C_A_retuned -> C_A_B layering)
+    # so it's clear which change does the work.
+    "C_A_B_v2_barrier": dict(terminal_use_soft_coverage=True, ptv_gap_power=2.0,
+                             oar_barrier_steepness=1.5, lambda_phi=2.0,
+                             oar_barrier_activation_threshold=0.8),
+    "C_A_B_v2_full":    dict(terminal_use_soft_coverage=True, ptv_gap_power=2.0,
+                             oar_barrier_steepness=1.5, lambda_phi=2.0,
+                             oar_barrier_activation_threshold=0.8,
+                             terminal_dvh_weight=0.4),
 }
 
 

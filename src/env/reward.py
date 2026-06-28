@@ -315,6 +315,7 @@ def oar_overshoot_fraction(cumulative_dose: np.ndarray,
                            organ_weights: Optional[Dict[str, float]] = None,
                            *,
                            steepness: Optional[float] = None,
+                           activation_threshold: Optional[float] = None,
                            ) -> float:
     """Weighted sum of OAR mean-dose overshoot vs the *full-course* tolerance.
 
@@ -332,6 +333,16 @@ def oar_overshoot_fraction(cumulative_dose: np.ndarray,
     module-level comments above) so a wildly over-dosed organ during early
     random rollouts can't blow this term up into a reward magnitude the
     critic can't fit.
+
+    ``activation_threshold`` (only used when ``steepness`` is also set):
+    the plain barrier above is never exactly zero, even for an organ at
+    zero dose (``exp(-steepness)`` at ``mean_dose=0``), so ``lambda_oar``
+    ends up fighting a constant tax everywhere rather than pressure
+    concentrated near the tolerance line. Setting ``activation_threshold``
+    (e.g. ``0.8``) makes the penalty exactly ``0.0`` while
+    ``mean_dose / tolerance`` is below that fraction of tolerance, then
+    ramps smoothly (``exp(k * (utilization - threshold)) - 1``, the ``-1``
+    keeping the takeoff at the threshold continuous) above it.
     """
     organ_weights = organ_weights or {}
     total = 0.0
@@ -343,9 +354,17 @@ def oar_overshoot_fraction(cumulative_dose: np.ndarray,
         excess_fraction = (mean_dose - tolerance) / tolerance
         if steepness is None:
             penalty = max(0.0, excess_fraction)
-        else:
+        elif activation_threshold is None:
             exponent = min(excess_fraction, _EXCESS_FRACTION_CLIP) * steepness
             penalty = min(float(np.exp(exponent)), _OAR_BARRIER_CLIP)
+        else:
+            utilization = mean_dose / tolerance
+            excess_from_threshold = utilization - activation_threshold
+            if excess_from_threshold <= 0.0:
+                penalty = 0.0
+            else:
+                exponent = min(excess_from_threshold, _EXCESS_FRACTION_CLIP) * steepness
+                penalty = min(float(np.exp(exponent)) - 1.0, _OAR_BARRIER_CLIP)
         total += float(organ_weights.get(organ_name, 1.0)) * penalty
     return total
 
@@ -360,14 +379,16 @@ def sequential_potential(cumulative_dose: np.ndarray,
                          organ_weights: Optional[Dict[str, float]] = None,
                          ptv_gap_power: float = 1.0,
                          oar_barrier_steepness: Optional[float] = None,
+                         oar_barrier_activation_threshold: Optional[float] = None,
                          ) -> float:
     """Potential phi(state) used for dense shaping (higher = better state).
 
     ``phi = -lambda_phi * ptv_gap_fraction - lambda_oar * oar_overshoot``.
     Closing the PTV gap and staying under OAR budget both raise phi toward 0.
-    ``ptv_gap_power`` / ``oar_barrier_steepness`` forward to Improvements A
-    / B in :func:`ptv_gap_fraction` / :func:`oar_overshoot_fraction`; both
-    default to the old (pre-improvement) behaviour.
+    ``ptv_gap_power`` / ``oar_barrier_steepness`` /
+    ``oar_barrier_activation_threshold`` forward to Improvements A / B in
+    :func:`ptv_gap_fraction` / :func:`oar_overshoot_fraction`; all default
+    to the old (pre-improvement) behaviour.
     """
     ptv_term = ptv_gap_fraction(
         cumulative_dose, prescription_volume, power=ptv_gap_power,
@@ -375,6 +396,7 @@ def sequential_potential(cumulative_dose: np.ndarray,
     oar_term = oar_overshoot_fraction(
         cumulative_dose, oar_masks, full_course_tolerances, organ_weights,
         steepness=oar_barrier_steepness,
+        activation_threshold=oar_barrier_activation_threshold,
     )
     return -lambda_phi * ptv_term - lambda_oar * oar_term
 

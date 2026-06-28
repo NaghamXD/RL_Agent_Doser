@@ -99,6 +99,12 @@ class Config:
     # Improvement B: oar_overshoot_fraction's soft-barrier steepness
     # (None=old hard threshold; a float enables the soft barrier).
     oar_barrier_steepness: Optional[float] = None
+    # Improvement B refinement (only used when oar_barrier_steepness is
+    # set): zero the soft barrier below this fraction of tolerance instead
+    # of taxing every organ everywhere (None=plain barrier, e.g. 0.8=zero
+    # below 80% utilization, smooth ramp above it). See
+    # reports/reward_shaping_sweep.md's C_A_B finding for why this exists.
+    oar_barrier_activation_threshold: Optional[float] = None
     # Improvement C: use soft_coverage (differentiable) instead of the hard
     # coverage() step inside terminal_reward.
     terminal_use_soft_coverage: bool = False
