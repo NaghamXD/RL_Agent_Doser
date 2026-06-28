@@ -656,3 +656,110 @@ def generate_eval_charts(env,
         saved.append(plot_fraction_rewards(fraction_records, out_dir, patient))
 
     return saved
+
+
+# ---------------------------------------------------------------------------
+# Single-patient trajectory charts (see scripts/visualize_patient_trajectory.py)
+#
+# Unlike generate_eval_charts above (which only sees the *accumulated*
+# action summed over all 35 fractions, and the diagnostic oar_penalty/
+# ptv_reward pair), these two work off a full per-fraction trajectory: the
+# raw action every fraction, and the actual env reward returned by step()
+# (the dense potential-based shaping signal that drives PPO in sequential
+# mode, plus the terminal reward paid out on the last fraction).
+# ---------------------------------------------------------------------------
+def plot_beam_intensity_trajectory(beam_intensity: np.ndarray,
+                                   n_beams: int,
+                                   out_dir: Path,
+                                   patient: str = "") -> Path:
+    """Beam usage over the whole course: heatmap + total-usage bar chart.
+
+    ``beam_intensity`` shape (n_fractions, n_beams): mean beamlet intensity
+    of each beam in each fraction. A near-zero row means that beam is
+    effectively unused across the whole course; a row that only lights up
+    later means the agent defers that beam rather than using it from
+    fraction 1.
+    """
+    n_fractions = beam_intensity.shape[0]
+    gantry_step = 360 / n_beams
+    beam_labels = [f"B{b} ({round(b * gantry_step)}°)" for b in range(n_beams)]
+
+    fig, (ax_heat, ax_bar) = plt.subplots(
+        1, 2, figsize=(12, 5), gridspec_kw={"width_ratios": [3, 1]})
+    fig.suptitle(f"Beam intensity across the {n_fractions}-fraction course "
+                f"— {patient}", fontsize=12, fontweight="bold")
+
+    vmax = float(beam_intensity.max()) or 1.0
+    im = ax_heat.imshow(beam_intensity.T, aspect="auto", cmap="inferno",
+                        origin="lower", vmin=0, vmax=vmax)
+    ax_heat.set_yticks(range(n_beams))
+    ax_heat.set_yticklabels(beam_labels, fontsize=8)
+    ax_heat.set_xlabel("Fraction index", fontsize=10)
+    ax_heat.set_title("Mean beamlet intensity per beam, per fraction", fontsize=10)
+    plt.colorbar(im, ax=ax_heat, fraction=0.046, pad=0.04,
+                label="mean intensity (a.u.)")
+
+    totals = beam_intensity.sum(axis=0)
+    order = np.argsort(totals)[::-1]
+    bar_colors = ["steelblue" if t > 0.01 * totals.max() else "lightgray"
+                 for t in totals[order]]
+    ax_bar.barh(range(n_beams), totals[order], color=bar_colors)
+    ax_bar.set_yticks(range(n_beams))
+    ax_bar.set_yticklabels([beam_labels[i] for i in order], fontsize=8)
+    ax_bar.invert_yaxis()
+    ax_bar.set_xlabel(f"Σ intensity, all {n_fractions} fx", fontsize=10)
+    ax_bar.set_title("Total usage per beam", fontsize=10)
+
+    fig.tight_layout()
+    path = out_dir / "trajectory_beam_intensity.png"
+    _save(fig, path)
+    return path
+
+
+def plot_reward_trajectory(shaping_rewards: np.ndarray,
+                           terminal_reward: float,
+                           dvh_score: float,
+                           out_dir: Path,
+                           patient: str = "") -> Path:
+    """Per-fraction dense shaping reward, plus the terminal-reward breakdown.
+
+    ``shaping_rewards`` (n_fractions,) is the dense ``gamma*phi' - phi``
+    signal alone (with the terminal reward already subtracted back out of
+    the last fraction) so every point is on the same scale. The terminal
+    reward is shown separately in the bar panel since it's a one-time,
+    end-of-course payout rather than a per-fraction quantity.
+    """
+    n_fractions = len(shaping_rewards)
+    fxs = np.arange(1, n_fractions + 1)
+
+    fig, (ax_line, ax_bar) = plt.subplots(
+        1, 2, figsize=(12, 5), gridspec_kw={"width_ratios": [2, 1]})
+    fig.suptitle(f"Reward across the {n_fractions}-fraction course — {patient}",
+                fontsize=12, fontweight="bold")
+
+    ax_line.plot(fxs, shaping_rewards, "o-", color="steelblue", lw=1.5, ms=4,
+                label="dense shaping reward  (γ·φ(s') − φ(s))")
+    ax_line.axhline(0, color="black", lw=0.7, ls=":")
+    ax_line.set_xlabel("Fraction index", fontsize=11)
+    ax_line.set_ylabel("reward (a.u.)", fontsize=11)
+    ax_line.legend(fontsize=9)
+    ax_line.grid(True, alpha=0.3)
+    ax_line.set_facecolor("#f8f9fa")
+
+    total_shaping = float(shaping_rewards.sum())
+    total_return = total_shaping + terminal_reward
+    bar_labels = [f"Σ shaping\n({n_fractions} fx)", "terminal\n(last fx only)",
+                 "total\nreturn"]
+    values = [total_shaping, terminal_reward, total_return]
+    colors = ["steelblue", "darkorange", "green"]
+    ax_bar.bar(bar_labels, values, color=colors)
+    ax_bar.axhline(0, color="black", lw=0.7)
+    ax_bar.set_title(f"DVH score = {dvh_score:.2f}", fontsize=10)
+    for i, v in enumerate(values):
+        ax_bar.text(i, v, f"{v:+.2f}", ha="center",
+                   va="bottom" if v >= 0 else "top", fontsize=9)
+
+    fig.tight_layout()
+    path = out_dir / "trajectory_reward.png"
+    _save(fig, path)
+    return path
