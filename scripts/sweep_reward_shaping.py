@@ -77,6 +77,43 @@ VARIANTS: dict[str, dict] = {
                              oar_barrier_steepness=1.5, lambda_phi=2.0,
                              oar_barrier_activation_threshold=0.8,
                              terminal_dvh_weight=0.4),
+    # v2_barrier/v2_full both early-stopped much sooner than C_A_B did
+    # (ep600/500 vs C_A_B's ep925, where it was still improving) -- a
+    # confound that has to be ruled out before judging the barrier fix on
+    # its merits. early_stop_patience_evals=0 disables the cutoff (best.pt
+    # selection is unaffected -- it always tracks the best validation DVH
+    # seen regardless of whether the loop breaks early), and
+    # terminal_dvh_weight=0.2 is a gentler middle ground after 0.4
+    # overshot into "scared straight" total-conservatism. v3_rebalanced_oar
+    # additionally softens lambda_oar (0.6 -> 0.4) on the theory that the
+    # barrier is now doing its job, so the overall OAR weight can come down
+    # a bit to let PTV coverage recover further -- isolated pairwise
+    # against v3_gentle_terminal (only lambda_oar differs between them).
+    "C_A_B_v3_gentle_terminal": dict(terminal_use_soft_coverage=True, ptv_gap_power=2.0,
+                                     oar_barrier_steepness=1.5, lambda_phi=2.0,
+                                     oar_barrier_activation_threshold=0.8,
+                                     terminal_dvh_weight=0.2,
+                                     early_stop_patience_evals=0),
+    "C_A_B_v3_rebalanced_oar": dict(terminal_use_soft_coverage=True, ptv_gap_power=2.0,
+                                    oar_barrier_steepness=1.5, lambda_phi=2.0,
+                                    oar_barrier_activation_threshold=0.8,
+                                    terminal_dvh_weight=0.2,
+                                    early_stop_patience_evals=0,
+                                    lambda_oar=0.4),
+    # Every terminal_dvh_weight increase tried so far hurt (0.1->25.04,
+    # 0.2->29.55, 0.4->31.09), while lambda_oar=0.4 alone produced the best
+    # new result (26.91) before it was confounded by also carrying
+    # terminal_dvh_weight=0.2 and an early-stop-disabled post-peak collapse.
+    # This isolates lambda_oar=0.4 with terminal_dvh_weight back at its only
+    # validated-good value (0.1) and real early stopping back on (patience=8,
+    # matching every other variant except the v3 confound-check pair above)
+    # so training halts near its peak instead of degrading past it.
+    "C_A_B_v3_oar_only": dict(terminal_use_soft_coverage=True, ptv_gap_power=2.0,
+                              oar_barrier_steepness=1.5, lambda_phi=2.0,
+                              oar_barrier_activation_threshold=0.8,
+                              terminal_dvh_weight=0.1,
+                              early_stop_patience_evals=8,
+                              lambda_oar=0.4),
 }
 
 
