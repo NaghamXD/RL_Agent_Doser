@@ -570,9 +570,9 @@ window.MathJax = {
       </tbody>
     </table>
     <p><b>The simulate payload</b> is what drives the visualisation: for each fraction it ships the <code>9 × 16 × 16</code> beam-intensity heatmap, the <code>reward</code> / <code>ptv_reward</code> / <code>oar_penalty</code> diagnostics, and the running mean dose to every structure. The <b>summary</b> then rolls the final cumulative doses into per-PTV coverage % (achieved if ≥ 95 %) and per-OAR % of tolerance (with a <code>violation</code> flag), correctly distinguishing "not contoured for this patient" (<code>present: false</code>, null numbers) from "contoured but received 0 Gy".</p>
-    <p><b>Running it.</b> Install deps (<code>flask</code> and <code>flask-cors</code> are in <a href="requirements.txt">requirements.txt</a>), then <code>python app.py --debug</code> (defaults to port 5000, binds 0.0.0.0). The browser front-end is launched separately via <code>run_ui.bat</code> / <code>run_ui.sh</code> — see <a href="UI_README.md">UI_README.md</a>.</p>
+    <p><b>Running it.</b> Install deps (<code>flask</code> and <code>flask-cors</code> are in <a href="requirements.txt">requirements.txt</a>), then <code>python app.py --debug</code> (defaults to port 5000, binds 0.0.0.0). The browser front-end is launched separately via <code>run_ui.bat</code> / <code>run_ui.sh</code> — see <a href="docs/UI_README.md">UI_README.md</a>.</p>
   </div>
-  <div class="step-code">see <a href="app.py">app.py</a> · uses <a href="src/env/dose_env.py">DoseEnv</a> + <a href="src/agents/ppo.py">PPO</a> · front-end docs in <a href="UI_README.md">UI_README.md</a></div>
+  <div class="step-code">see <a href="app.py">app.py</a> · uses <a href="src/env/dose_env.py">DoseEnv</a> + <a href="src/agents/ppo.py">PPO</a> · front-end docs in <a href="docs/UI_README.md">UI_README.md</a></div>
 </div>
 
 <h2 style="margin-top:32px">All the defaults in one place</h2>

@@ -102,9 +102,10 @@ scripts/benchmark_device.py    CPU vs MPS vs CUDA timing harness (synthetic data
 scripts/mps_warmstart_retry.py isolated MPS-NaN-bug investigation (does not touch production code)
 scripts/inspect_numpy_arrays.py quick sanity dump of cached .npy files
 runs/                          all checkpoints, CSV logs, sweep outputs (gitignored)
-reports/                       reward-shaping ablation writeup + summary CSV + comparison plot
-app.py, dashboard.html, *.md (DELIVERABLES/QUICK_START/INDEX/START_HERE/PROJECT_SUMMARY/UI_README)
-                                a separate Flask + React demo dashboard for live-simulating the agent;
+reports/                       reward-shaping + test-set writeups, summary CSVs, comparison plots
+docs/                          this file, training_runs_analysis.md, and the UI dashboard's own
+                                docs (DELIVERABLES/QUICK_START/INDEX/START_HERE/PROJECT_SUMMARY/UI_README)
+app.py, dashboard.html         a separate Flask + React demo dashboard for live-simulating the agent;
                                 not part of the RL training/evaluation pipeline itself (see §12)
 ```
 
